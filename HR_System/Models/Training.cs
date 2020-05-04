@@ -21,7 +21,7 @@ namespace HR_System.Models
         private int maxRank;
         private int positionId;
         private int departmentId;
-
+        private int maxNumOfParticipants;
         public int TrainingId { get => trainingId; set => trainingId = value; }
         public string TrainingName { get => trainingName; set => trainingName = value; }
         public DateTime StartDate { get => startDate; set => startDate = value; }
@@ -33,6 +33,7 @@ namespace HR_System.Models
         public int MaxRank { get => maxRank; set => maxRank = value; }
         public int PositionId { get => positionId; set => positionId = value; }
         public int DepartmentId { get => departmentId; set => departmentId = value; }
+        public int MaxNumOfParticipants { get => maxNumOfParticipants; set => maxNumOfParticipants = value; }
 
         private SqlConnection con;
         private void connection()

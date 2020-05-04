@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
@@ -20,7 +21,12 @@ namespace HR_System.Models
         private string ssn;
         private string address;
 
-        SqlConnection con = new SqlConnection("Data Source=developmentserver.database.windows.net;Initial Catalog=HR;User ID=afm2020;Password=********;Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+        private SqlConnection con;
+        private void connection()
+        {
+            string constring = ConfigurationManager.ConnectionStrings["HRCon"].ToString();
+            con = new SqlConnection(constring);
+        }
 
         public int User_id { get => user_id; set => user_id = value; }
 
@@ -39,22 +45,83 @@ namespace HR_System.Models
         {
 
         }
-        private void setArrivalTime (int id, TimeSpan currentTime)
+        // check if the employee has set his arrival time before
+        public int checkDuplicatesArrivals(int employeeId,DateTime date)
         {
-            
+            connection();
+            SqlCommand cmd = new SqlCommand("checkDuplicatesArrivals", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employeeId", employeeId);
+            cmd.Parameters.AddWithValue("@date", date);
+            cmd.Parameters.Add("@count", SqlDbType.TinyInt).Direction = ParameterDirection.Output;
+            con.Open();
+            cmd.ExecuteNonQuery();
+            int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
+            return count;
         }
-        private void setLeaveTime(int id ,TimeSpan currentTime)
+        private int setArrivalTime (int id)
         {
+            DateTime now = DateTime.Now;
+            int success = 0;
+            if (checkDuplicatesArrivals(id, now.Date)==0)
+            {
+                connection();
+                SqlCommand cmd = new SqlCommand("setArrivalTime", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@employeeId", id);
+                cmd.Parameters.AddWithValue("@date", now.Date);
+                cmd.Parameters.AddWithValue("@time", now.TimeOfDay);
+                
+                con.Open();
+                success=cmd.ExecuteNonQuery();
+                con.Close();
+                return success;
+            }
+            return success;
+        }
+        // check whether the employee has already set his leave time before
+        public int checkDuplicatesLeave(int employeeId, DateTime date)
+        {
+            connection();
+            SqlCommand cmd = new SqlCommand("checkDuplicatesLeave", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employeeId", employeeId);
+            cmd.Parameters.AddWithValue("@date", date);
+            cmd.Parameters.Add("@count", SqlDbType.TinyInt).Direction = ParameterDirection.Output;
+            con.Open();
+            cmd.ExecuteNonQuery();
+            int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
+            return count;
+        }
+        private int setLeaveTime(int id )
+        {
+            DateTime now = DateTime.Now;
+            int success = 0;
+            if (checkDuplicatesLeave(id, now.Date) == 0)
+            {
+                connection();
+                SqlCommand cmd = new SqlCommand("setLeaveTime", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@employeeId", id);
+                cmd.Parameters.AddWithValue("@date", now.Date);
+                cmd.Parameters.AddWithValue("@time", now.TimeOfDay);
 
+                con.Open();
+                success = cmd.ExecuteNonQuery();
+                con.Close();
+                return success;
+            }
+            return success;
         }
-        public string viewAttendance(int id ,DateTime start_date,DateTime end_date)
+        //if start_date and end_date == null then view the attendance of the previous month
+        //start_date == null view attendance of a month before end_date
+        //end_date == null view attendance of start_date only
+        public List<Attendance> viewAttendance(int id ,DateTime start_date,DateTime end_date)
         {
-            id = User_id;
+            List<Attendance> attendancesList = new List<Attendance>();
             start_date = start_date.Date;
             end_date = end_date.Date;
-           // List<string> attendance = new List<string>();
-            var cmd = new SqlCommand("dbo.viewttendance", con);
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+           
             
             if (start_date==null && end_date== null)
             {
@@ -66,16 +133,29 @@ namespace HR_System.Models
             }
             else if (end_date == null)
             {
-                end_date = start_date.AddDays(30);
+                end_date = start_date;
             }
-            cmd.Parameters.Add(new SqlParameter("@id", id));
-            cmd.Parameters.Add(new SqlParameter("@start_date", start_date));
-            cmd.Parameters.Add(new SqlParameter("@end_date", end_date));
+            connection();
+            SqlCommand cmd = new SqlCommand("viewEmployeeAttendance", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
             con.Open();
-            string attendance = cmd.ExecuteScalar().ToString();
+            sd.Fill(dt);
             con.Close();
-            
-            return attendance;
+            foreach (DataRow dr in dt.Rows)
+            {
+                Attendance attendance = new Attendance();
+                attendance.Date = Convert.ToDateTime(dr["day_date"]).Date;
+                attendance.ArrivalTime= Convert.ToDateTime(dr["arrival_time"]);
+                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
+
+                attendancesList.Add(attendance);
+            }
+
+
+            return attendancesList;
         }
         private List<string> viewProfile(int id)
         {

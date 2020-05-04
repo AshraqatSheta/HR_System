@@ -60,34 +60,45 @@ namespace HR_System.Models
                   
         }
 
-        private Attendance getAttendanceForEmployeeOnDate(int employeeId, DateTime date)
+        private List<Attendance> getAttendanceForEmployee(int employeeId, DateTime start_date,DateTime end_date)
         {
-            Attendance attendance = new Attendance();
-            attendance.EmployeeId = employeeId;
-            attendance.Date = date;
+            List<Attendance> attendancesList = new List<Attendance>();
+            start_date = start_date.Date;
+            end_date = end_date.Date;
+
+
+            if (start_date == null && end_date == null)
+            {
+                end_date = DateTime.Today.Date;
+                start_date = end_date.AddDays(-30);
+            }
+            else if (start_date == null)
+            {
+                start_date = end_date.AddDays(-30);
+            }
+            else if (end_date == null)
+            {
+                end_date = start_date;
+            }
             connection();
-            SqlCommand cmd = new SqlCommand("getAttendanceForEmployeeOnDate", con);
+            SqlCommand cmd = new SqlCommand("viewEmployeeAttendance", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@employeeId", employeeId);
-            cmd.Parameters.AddWithValue("@date", date.Date);
             SqlDataAdapter sd = new SqlDataAdapter(cmd);
             DataTable dt = new DataTable();
 
             con.Open();
             sd.Fill(dt);
             con.Close();
-
             foreach (DataRow dr in dt.Rows)
             {
+                Attendance attendance = new Attendance();
+                attendance.Date = Convert.ToDateTime(dr["day_date"]).Date;
+                attendance.ArrivalTime = Convert.ToDateTime(dr["arrival_time"]);
+                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
 
-                attendance.EmployeeName = Convert.ToString(dr["full_name"]);
-                attendance.ArrivalTime= Convert.ToDateTime(dr["arrival_time"]);
-                attendance.LeaveTime = Convert.ToDateTime(dr["leave_time"]);
-                
-
+                attendancesList.Add(attendance);
             }
-            
-            return attendance;
+            return attendancesList;
         }
         private List<Attendance> getAttendanceOnDate(DateTime date)
         {
@@ -156,6 +167,30 @@ namespace HR_System.Models
             }
             
             return attendanceList;
+        }
+
+        private Attendance getAttendanceForEmployeeOnDate(int id, DateTime date)
+        {
+            Attendance attendance = new Attendance();
+            connection();
+            SqlCommand cmd = new SqlCommand("getAttendanceForEmployeeOnDate", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+               
+                attendance.EmployeeName = Convert.ToString(dr["full_name"]);
+                attendance.ArrivalTime = Convert.ToDateTime(dr["arrival_time"]);
+                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
+
+                
+            }
+            return attendance;
         }
 
         private List<List<string>> getPerformancReports(int id)
@@ -539,6 +574,64 @@ namespace HR_System.Models
 
             return success;
 
+        }
+        public Training viewTraining (int trainingId)
+        {
+            Training training = new Training();
+
+            connection();
+            SqlCommand cmd = new SqlCommand("viewTraining", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@trainingId", trainingId);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                training.TrainingId = Convert.ToInt32(dr["training_id"]);
+                training.TrainingName = Convert.ToString(dr["name"]);
+                training.StartDate = Convert.ToDateTime(dr["start_date"]).Date;
+                training.EndDate = Convert.ToDateTime(dr["end_date"]).Date;
+                training.Location = Convert.ToString(dr["location"]);
+                training.ParticipationsNum = Convert.ToInt32(dr["number_of_participants"]);
+                training.HoursPerDay = Convert.ToInt32(dr["hours_per_day"]);
+                training.SkillId = Convert.ToInt32(dr["skill_id"]);
+                training.MaxRank = Convert.ToInt32(dr["maxRank"]);
+                training.PositionId = Convert.ToInt32(dr["positionId"]);
+                training.DepartmentId = Convert.ToInt32(dr["departmentId"]);
+                training.MaxNumOfParticipants = Convert.ToInt32(dr["max_number_of_participants"]);
+
+
+            }
+            return training;
+        }
+        public List<Training> viewListOfTraining()
+        {
+            List<Training> trainingList = new List<Training>();
+            List<int> trainingId = new List<int>();
+            connection();
+            SqlCommand cmd = new SqlCommand("viewListOfTraining", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                int id = Convert.ToInt32(dr["training_id"]);
+                trainingId.Add(id);
+            }
+            foreach(int id in trainingId)
+            {
+                Training training = viewTraining(id);
+                trainingList.Add(training);
+            }
+            return trainingList;
         }
         public List<List<string>> getEmployeePerformanceBeforeAndAfterTraining(List<int> compatibleCandidatesId)
         {
