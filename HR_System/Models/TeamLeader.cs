@@ -12,16 +12,16 @@ namespace HR_System.Models
 
         public int createProject(Project project)
         {
-            int projectId;
+            int projectId=0;
 
             return projectId;
 
         }
         public int createTask(Task task)
         {
-            int taskId;
+            int taskId=0;
 
-            return taskId
+            return taskId;
 
         }
         public List<List<string>> getEployeeForTask(Task task)

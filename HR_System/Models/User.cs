@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -20,7 +21,7 @@ namespace HR_System.Models
         private string number;
         private string ssn;
         private string address;
-
+        Utiles u = new Utiles();
         private SqlConnection con;
         private void connection()
         {
@@ -34,9 +35,9 @@ namespace HR_System.Models
         {
 
         }
-        private int logIn (string userName,string password)
+        private int logIn(string userName, string password)
         {
-            int id=0;
+            int id = 0;
 
             return id;
 
@@ -46,7 +47,7 @@ namespace HR_System.Models
 
         }
         // check if the employee has set his arrival time before
-        public int checkDuplicatesArrivals(int employeeId,DateTime date)
+        public int checkDuplicatesArrivals(int employeeId, DateTime date)
         {
             connection();
             SqlCommand cmd = new SqlCommand("checkDuplicatesArrivals", con);
@@ -59,11 +60,11 @@ namespace HR_System.Models
             int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
             return count;
         }
-        private int setArrivalTime (int id)
+        private int setArrivalTime(int id)
         {
             DateTime now = DateTime.Now;
             int success = 0;
-            if (checkDuplicatesArrivals(id, now.Date)==0)
+            if (checkDuplicatesArrivals(id, now.Date) == 0)
             {
                 connection();
                 SqlCommand cmd = new SqlCommand("setArrivalTime", con);
@@ -71,9 +72,9 @@ namespace HR_System.Models
                 cmd.Parameters.AddWithValue("@employeeId", id);
                 cmd.Parameters.AddWithValue("@date", now.Date);
                 cmd.Parameters.AddWithValue("@time", now.TimeOfDay);
-                
+
                 con.Open();
-                success=cmd.ExecuteNonQuery();
+                success = cmd.ExecuteNonQuery();
                 con.Close();
                 return success;
             }
@@ -93,7 +94,7 @@ namespace HR_System.Models
             int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
             return count;
         }
-        private int setLeaveTime(int id )
+        private int setLeaveTime(int id)
         {
             DateTime now = DateTime.Now;
             int success = 0;
@@ -116,18 +117,18 @@ namespace HR_System.Models
         //if start_date and end_date == null then view the attendance of the previous month
         //start_date == null view attendance of a month before end_date
         //end_date == null view attendance of start_date only
-        public List<Attendance> viewAttendance(int id ,DateTime start_date,DateTime end_date)
+        public List<Attendance> viewAttendance(int id, DateTime start_date, DateTime end_date)
         {
             List<Attendance> attendancesList = new List<Attendance>();
             start_date = start_date.Date;
             end_date = end_date.Date;
-           
-            
-            if (start_date==null && end_date== null)
+
+
+            if (start_date == null && end_date == null)
             {
                 end_date = DateTime.Today.Date;
                 start_date = end_date.AddDays(-30);
-            }else if (start_date == null)
+            } else if (start_date == null)
             {
                 start_date = end_date.AddDays(-30);
             }
@@ -148,8 +149,8 @@ namespace HR_System.Models
             {
                 Attendance attendance = new Attendance();
                 attendance.Date = Convert.ToDateTime(dr["day_date"]).Date;
-                attendance.ArrivalTime= Convert.ToDateTime(dr["arrival_time"]);
-                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
+                attendance.ArrivalTime = (TimeSpan)Convert.ToDateTime(dr["arrival_time"]).TimeOfDay;
+                attendance.LeaveTime = (TimeSpan)Convert.ToDateTime(dr["leave_time"]).TimeOfDay;
 
                 attendancesList.Add(attendance);
             }
@@ -157,6 +158,296 @@ namespace HR_System.Models
 
             return attendancesList;
         }
+
+        //Attendance update 
+        //take start and end date and get Attendance table with permissions and holidays 
+        public List<Attendance> viewAttendanceDetails(string taken_start_date, string taken_end_date, int employeeId)
+        {
+
+
+            int attendanceIndex = 0;
+            int holidayIndex = 0;
+            int permissionIndex = 0;
+            int vacationIndex = 0;
+
+            List<Attendance> attendanceLog = new List<Attendance>();
+            // start_date = start_date.Date;
+            // end_date = end_date.Date;
+
+            DateTime start_date = new DateTime();
+
+            DateTime end_date = new DateTime();
+            if (((taken_start_date == null) || (taken_start_date == "")) && ((taken_end_date == null) || (taken_end_date == "")))
+            {
+                DateTime now = DateTime.Now;
+                start_date = new DateTime(now.Year, now.Month, 1);
+                end_date = start_date.AddMonths(1).AddDays(-1);
+            }
+            else if ((taken_start_date == null)||(taken_start_date==""))
+            {
+                DateTime now = DateTime.Now;
+                start_date = new DateTime(now.Year, now.Month, 1);
+                end_date = start_date.AddMonths(1).AddDays(-1);
+                
+            }
+            else if ((taken_end_date == null)||(taken_end_date==""))
+            {
+                start_date = Convert.ToDateTime(taken_start_date).Date;
+                end_date = start_date;
+            }
+            else
+            {
+                start_date = Convert.ToDateTime(taken_start_date).Date;
+                end_date = Convert.ToDateTime(taken_end_date).Date;
+            }
+            List<Attendance> attendanceList = getAttendance(employeeId, start_date, end_date);
+            List<Holiday> holidays = getHolidays(employeeId, start_date, end_date);
+            List<Permission> permissions = getPermissions(employeeId, start_date, end_date);
+            List<Official_Vacation> official_Vacations = getOfficialVacations(start_date, end_date);
+            for (DateTime day = start_date; day.Date <= end_date.Date; day = day.AddDays(1))
+            {
+                bool flagAttendance = false;
+                if(attendanceIndex < attendanceList.Count)
+                {
+                    if (day.Date.Equals(attendanceList[attendanceIndex].Date))
+                    {
+                        if (permissionIndex < permissions.Count)
+                        {
+                            if (day.Date.Equals(permissions[permissionIndex].StartTime.Date))
+                            {
+                                string note = String.Concat("Permission : from ", permissions[permissionIndex].StartTime.ToString("r", DateTimeFormatInfo.InvariantInfo), " to", permissions[permissionIndex].EndTime.ToString("r", DateTimeFormatInfo.InvariantInfo));
+                                attendanceLog.Add(getAttendanceLog(attendanceList[attendanceIndex].ArrivalTime, attendanceList[attendanceIndex].LeaveTime, attendanceList[attendanceIndex].Date, note));
+                                permissionIndex++;
+                            }
+                            else
+                            {
+                                attendanceLog.Add(getAttendanceLog(attendanceList[attendanceIndex].ArrivalTime, attendanceList[attendanceIndex].LeaveTime, attendanceList[attendanceIndex].Date, "Attendance"));
+                            }
+                        }
+                        else
+                        {
+                            attendanceLog.Add(getAttendanceLog(attendanceList[attendanceIndex].ArrivalTime, attendanceList[attendanceIndex].LeaveTime, attendanceList[attendanceIndex].Date, "Attendance"));
+                        }
+                        attendanceIndex++;
+                        flagAttendance = true;
+
+                    }
+                    else
+                    {
+                        bool flagVacation = false;
+                        if (vacationIndex < official_Vacations.Count)
+                        {
+                            if ((day.Date.CompareTo(official_Vacations[vacationIndex].StartDate)>=0)&& (day.Date.CompareTo(official_Vacations[vacationIndex].EndDate) <= 0) )
+                            {
+                                flagVacation = true;
+                                attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, official_Vacations[vacationIndex].VacationName));
+                                if(day.Date.CompareTo(official_Vacations[vacationIndex].EndDate) == 0)
+                                {
+                                    vacationIndex++;
+
+                                }
+                            }
+
+
+                        }
+                        if (!flagVacation)
+                        {
+                            bool flagHoliday = false;
+                            if(holidayIndex < holidays.Count)
+                            {
+                                if ((day.Date.CompareTo(holidays[holidayIndex].StartDate) >= 0) && (day.Date.CompareTo(holidays[holidayIndex].EndDate) <= 0))
+                                {
+                                    flagHoliday = true;
+                                    attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, "Paied Holiday"));
+                                    if (day.Date.CompareTo(holidays[holidayIndex].EndDate) == 0)
+                                    {
+                                        holidayIndex++;
+
+                                    }
+                                }
+
+                            }
+                            if (!flagHoliday)
+                            {
+                                attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, "Absent"));
+                            }
+                        }
+                     }
+
+                }
+                else
+                {
+                    bool flagVacation = false;
+                    if (vacationIndex < official_Vacations.Count)
+                    {
+                        if ((day.Date.CompareTo(official_Vacations[vacationIndex].StartDate) >= 0) && (day.Date.CompareTo(official_Vacations[vacationIndex].EndDate) <= 0))
+                        {
+                            flagVacation = true;
+                            attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, official_Vacations[vacationIndex].VacationName));
+                            if (day.Date.CompareTo(official_Vacations[vacationIndex].EndDate) == 0)
+                            {
+                                vacationIndex++;
+
+                            }
+                        }
+
+
+                    }
+                    if (!flagVacation)
+                    {
+                        bool flagHoliday = false;
+                        if (holidayIndex < holidays.Count)
+                        {
+                            if ((day.Date.CompareTo(holidays[holidayIndex].StartDate) >= 0) && (day.Date.CompareTo(holidays[holidayIndex].EndDate) <= 0))
+                            {
+                                flagHoliday = true;
+                                attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, "Paied Holiday"));
+                                if (day.Date.CompareTo(holidays[holidayIndex].EndDate) == 0)
+                                {
+                                    holidayIndex++;
+
+                                }
+                            }
+
+                        }
+                        if (!flagHoliday)
+                        {
+                            attendanceLog.Add(getAttendanceLog(TimeSpan.Zero, TimeSpan.Zero, day.Date, "Absent"));
+                        }
+                    }
+                }
+
+            }
+
+                return attendanceLog;
+        }
+
+        private Attendance getAttendanceLog(TimeSpan arrivalTime, TimeSpan leaveTime, DateTime date, string v)
+        {
+            Attendance attendance = new Attendance();
+            attendance.ArrivalTime = arrivalTime;
+            attendance.LeaveTime = leaveTime;
+            attendance.Date = date;
+            attendance.Note = v;
+
+            return attendance;
+        }
+
+        private List<Official_Vacation> getOfficialVacations(DateTime start_date, DateTime end_date)
+        {
+            List<Official_Vacation> official_Vacations = new List<Official_Vacation>();
+            connection();
+            
+            SqlCommand cmd = new SqlCommand("Employee_official_vacation", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@startdate", start_date.Date);
+            cmd.Parameters.AddWithValue("@enddate", end_date.Date);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Official_Vacation official_Vacation = new Official_Vacation();
+                official_Vacation.StartDate = Convert.ToDateTime(dr["start_day"]).Date;
+                official_Vacation.EndDate = Convert.ToDateTime(dr["end_day"]).Date;
+                official_Vacation.VacationName = Convert.ToString(dr["name"]);
+                official_Vacations.Add(official_Vacation);
+
+            }
+            return official_Vacations;
+        }
+
+        private List<Permission> getPermissions(int employeeId, DateTime start_date, DateTime end_date)
+        {
+            List<Permission> permissions = new List<Permission>();
+            connection();
+
+            SqlCommand cmd = new SqlCommand("Employee_permission", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employee_id", employeeId);
+            cmd.Parameters.AddWithValue("@startdate", start_date.Date);
+            cmd.Parameters.AddWithValue("@enddate", end_date.Date);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Permission permission = new Permission();
+                permission.StartTime = Convert.ToDateTime(dr["start_time"]);
+                permission.EndTime = Convert.ToDateTime(dr["end_time"]);
+
+                permissions.Add(permission);
+
+            }
+            return permissions;
+        }
+
+        private List<Holiday> getHolidays(int employeeId, DateTime start_date, DateTime end_date)
+        {
+            List<Holiday> holidays = new List<Holiday>();
+            connection();
+
+            SqlCommand cmd = new SqlCommand("Employee_Holiday", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employee_id", employeeId);
+            cmd.Parameters.AddWithValue("@startdate", start_date.Date);
+            cmd.Parameters.AddWithValue("@enddate", end_date.Date);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Holiday holiday = new Holiday();
+                holiday.StartDate = Convert.ToDateTime(dr["start_date"]).Date;
+                holiday.EndDate = Convert.ToDateTime(dr["end_date"]).Date;
+
+                holidays.Add(holiday);
+
+            }
+            return holidays;
+        }
+
+        private List<Attendance> getAttendance(int employeeId, DateTime start_date, DateTime end_date)
+        {
+            List<Attendance> attendances = new List<Attendance>();
+            connection();
+
+            SqlCommand cmd = new SqlCommand("Employee_attendance", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employee_id", employeeId);
+            cmd.Parameters.AddWithValue("@startdate", start_date.Date);
+            cmd.Parameters.AddWithValue("@enddate", end_date.Date);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Attendance attendance = new Attendance();
+                attendance.ArrivalTime = (TimeSpan)(dr["arrival_time"]);
+                attendance.LeaveTime =(TimeSpan) (dr["leave_time"]);
+                attendance.Date = Convert.ToDateTime(dr["day_date"]).Date;
+                attendances.Add(attendance);
+
+            }
+            return attendances;
+        }
+
         private List<string> viewProfile(int id)
         {
             List<string> profileInfo = new List<string>();

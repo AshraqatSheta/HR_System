@@ -12,10 +12,16 @@ namespace HR_System.Models
     public class HrAdmin
     {
         private SqlConnection con;
+        private SqlConnection conDW;
         private void connection()
         {
             string constring = ConfigurationManager.ConnectionStrings["HRCon"].ToString();
             con = new SqlConnection(constring);
+        }
+        private void DWconnection()
+        {
+            string constring = ConfigurationManager.ConnectionStrings["DwCon"].ToString();
+            conDW = new SqlConnection(constring);
         }
 
         // return 0 if no duplicates and return 1 otherwise
@@ -93,8 +99,8 @@ namespace HR_System.Models
             {
                 Attendance attendance = new Attendance();
                 attendance.Date = Convert.ToDateTime(dr["day_date"]).Date;
-                attendance.ArrivalTime = Convert.ToDateTime(dr["arrival_time"]);
-                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
+                attendance.ArrivalTime =(TimeSpan) Convert.ToDateTime(dr["arrival_time"]).TimeOfDay;
+                attendance.ArrivalTime =(TimeSpan) Convert.ToDateTime(dr["leave_time"]).TimeOfDay;
 
                 attendancesList.Add(attendance);
             }
@@ -121,8 +127,8 @@ namespace HR_System.Models
                 Attendance attendance = new Attendance();
                 attendance.EmployeeId = Convert.ToInt32(dr["employee_id"]);
                 attendance.EmployeeName = Convert.ToString(dr["full_name"]);
-                attendance.ArrivalTime = Convert.ToDateTime(dr["arrival_time"]);
-                attendance.LeaveTime = Convert.ToDateTime(dr["leave_time"]);
+                attendance.ArrivalTime =(TimeSpan) Convert.ToDateTime(dr["arrival_time"]).TimeOfDay;
+                attendance.LeaveTime =(TimeSpan) Convert.ToDateTime(dr["leave_time"]).TimeOfDay;
 
                 attendanceList.Add(attendance);
             }
@@ -185,8 +191,8 @@ namespace HR_System.Models
             {
                
                 attendance.EmployeeName = Convert.ToString(dr["full_name"]);
-                attendance.ArrivalTime = Convert.ToDateTime(dr["arrival_time"]);
-                attendance.ArrivalTime = Convert.ToDateTime(dr["leave_time"]);
+                attendance.ArrivalTime = (TimeSpan)Convert.ToDateTime(dr["arrival_time"]).TimeOfDay;
+                attendance.ArrivalTime =(TimeSpan) Convert.ToDateTime(dr["leave_time"]).TimeOfDay;
 
                 
             }
@@ -293,20 +299,20 @@ namespace HR_System.Models
             SqlCommand cmd = new SqlCommand("insertTraining", con);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@trainingName", training.TrainingName);
-            cmd.Parameters.AddWithValue("@startDate",training.StartDate.Date);
+            cmd.Parameters.AddWithValue("@startDate", training.StartDate.Date);
             cmd.Parameters.AddWithValue("@endDate", training.EndDate.Date);
             cmd.Parameters.AddWithValue("@location", training.Location);
-            cmd.Parameters.AddWithValue("@numberOfParticipants", training.ParticipationsNum);
+            cmd.Parameters.AddWithValue("@maxNumberOfParticipants", training.MaxNumOfParticipants);
             cmd.Parameters.AddWithValue("@hoursPerDay", training.HoursPerDay);
             cmd.Parameters.AddWithValue("@skillId", training.SkillId);
             cmd.Parameters.AddWithValue("@maxRank", training.MaxRank);
             cmd.Parameters.AddWithValue("@positionId", training.PositionId);
-            cmd.Parameters.AddWithValue("@departmentId", training.DepartmentId);
-            cmd.Parameters.Add("@trainingId", SqlDbType.TinyInt).Direction = ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@dapartmentId", training.DepartmentId);
+            cmd.Parameters.Add("@trainingId", SqlDbType.Int).Direction = ParameterDirection.Output;
             con.Open();
             cmd.ExecuteNonQuery();
             trainingId = Convert.ToInt32(cmd.Parameters["@trainingId"].Value);
-            
+            con.Close();
             return trainingId;
         }
         public List<int> viewEmployeesForTraining(int trainingId)
@@ -593,15 +599,53 @@ namespace HR_System.Models
             {
                 training.TrainingId = Convert.ToInt32(dr["training_id"]);
                 training.TrainingName = Convert.ToString(dr["name"]);
-                training.StartDate = Convert.ToDateTime(dr["start_date"]).Date;
-                training.EndDate = Convert.ToDateTime(dr["end_date"]).Date;
+                if (DBNull.Value.Equals(dr["start_date"]))
+                {
+                    training.StartDate=new DateTime();
+                }
+                else
+                {
+
+                    training.StartDate = Convert.ToDateTime(dr["start_date"]).Date;
+                }
+                if (DBNull.Value.Equals(dr["end_date"]))
+                {
+                    training.EndDate = new DateTime();
+                }
+                else
+                {
+
+                    training.EndDate = Convert.ToDateTime(dr["end_date"]).Date;
+                }
                 training.Location = Convert.ToString(dr["location"]);
                 training.ParticipationsNum = Convert.ToInt32(dr["number_of_participants"]);
                 training.HoursPerDay = Convert.ToInt32(dr["hours_per_day"]);
                 training.SkillId = Convert.ToInt32(dr["skill_id"]);
-                training.MaxRank = Convert.ToInt32(dr["maxRank"]);
-                training.PositionId = Convert.ToInt32(dr["positionId"]);
-                training.DepartmentId = Convert.ToInt32(dr["departmentId"]);
+                if (DBNull.Value.Equals(dr["maxRank"]))
+                {
+                    training.MaxRank = 0;
+                }
+                else
+                {
+                    training.MaxRank = Convert.ToInt32(dr["maxRank"]);
+                }
+                if (DBNull.Value.Equals(dr["positionId"]))
+                {
+                    training.PositionId = 0;
+                }
+                else
+                {
+                    training.PositionId = Convert.ToInt32(dr["positionId"]);
+                }
+                if (DBNull.Value.Equals(dr["departmentId"]))
+                {
+                    training.DepartmentId = 0;
+                }
+                else
+                {
+                    training.DepartmentId = Convert.ToInt32(dr["departmentId"]);
+                }
+
                 training.MaxNumOfParticipants = Convert.ToInt32(dr["max_number_of_participants"]);
 
 
@@ -623,15 +667,65 @@ namespace HR_System.Models
             con.Close();
             foreach (DataRow dr in dt.Rows)
             {
-                int id = Convert.ToInt32(dr["training_id"]);
-                trainingId.Add(id);
+                //int id = Convert.ToInt32(dr["training_id"]);
+                //trainingId.Add(id);
+                Training training = new Training();
+                training.TrainingId = Convert.ToInt32(dr["training_id"]);
+                training.TrainingName = Convert.ToString(dr["name"]);
+                training.StartDate = Convert.ToDateTime(dr["start_date"]).Date;
+                training.EndDate = Convert.ToDateTime(dr["end_date"]).Date;
+                training.Location = Convert.ToString(dr["location"]);
+                training.ParticipationsNum = Convert.ToInt32(dr["number_of_participants"]);
+                training.HoursPerDay = Convert.ToInt32(dr["hours_per_day"]);
+                training.SkillId = Convert.ToInt32(dr["skill_id"]);
+                if (DBNull.Value.Equals(dr["maxRank"]))
+                {
+                    training.MaxRank = 0;
+                }
+                else {
+                    training.MaxRank = Convert.ToInt32(dr["maxRank"]);
+                }
+                if (DBNull.Value.Equals(dr["positionId"] ))
+                {
+                    training.PositionId = 0;
+                }
+                else
+                {
+                    training.PositionId = Convert.ToInt32(dr["positionId"]);
+                }
+                if (DBNull.Value.Equals(dr["departmentId"]))
+                {
+                    training.DepartmentId = 0;
+                }
+                else
+                {
+                    training.DepartmentId = Convert.ToInt32(dr["departmentId"]);
+                }
+
+                training.MaxNumOfParticipants = Convert.ToInt32(dr["max_number_of_participants"]);
+                trainingList.Add(training);
             }
-            foreach(int id in trainingId)
+           /* foreach(int id in trainingId)
             {
                 Training training = viewTraining(id);
                 trainingList.Add(training);
-            }
+            }*/
             return trainingList;
+        }
+        public DataTable employeeEnrolledInTraining(int training_id)
+        {
+            connection();
+            SqlCommand cmd = new SqlCommand("getEmployeeEnrolledInTraining", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@training_id", training_id);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            return dt;
         }
         public List<List<string>> getEmployeePerformanceBeforeAndAfterTraining(List<int> compatibleCandidatesId)
         {
@@ -652,7 +746,271 @@ namespace HR_System.Models
             return suitableApplicants;
         }
 
+        ///Attendanc Reporting 
+        ///
+        public DataTable viewAttendanceReportProgress(string category,string category_value,DateTime from,DateTime to)
+        {
+            DWconnection();
+            if (category=="Employee")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_employee", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@employee_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear",from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
 
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category =="Department")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_department", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@department_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear", from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category =="Position")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_position", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@position_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear", from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+                
+                return dt;
+            }
+            
+        }
+
+        public DataTable viewAttendanceReportComparison(string category,  DateTime date)
+        {
+            DWconnection();
+            if (category=="Employee")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_employees_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@month", date.Month);
+                cmd.Parameters.AddWithValue("@year", date.Year);
+                
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category=="Department")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_departments_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                int month = date.Month;
+                int year = date.Year;
+                cmd.Parameters.AddWithValue("@month", month);
+                cmd.Parameters.AddWithValue("@year", year);
+                
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category=="Position")
+            {
+                SqlCommand cmd = new SqlCommand("Report_attendance_by_positions_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@month", date.Month);
+                cmd.Parameters.AddWithValue("@year", date.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+                return dt;
+            }
+            
+        }
+
+        public DataTable viewPerformanceReportProgress(string category, string category_value, DateTime from, DateTime to)
+        {
+            DWconnection();
+            if (category == "Employee")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_employee", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@employee_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear", from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category == "Department")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_department", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@department_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear", from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category == "Position")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_position", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@position_name", category_value);
+                cmd.Parameters.AddWithValue("@startmonth", from.Month);
+                cmd.Parameters.AddWithValue("@endmonth", to.Month);
+                cmd.Parameters.AddWithValue("@startyear", from.Year);
+                cmd.Parameters.AddWithValue("@endyear", to.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+
+                return dt;
+            }
+
+        }
+
+        public DataTable viewPerformanceReportComparison(string category, DateTime date)
+        {
+            DWconnection();
+            if (category == "Employee")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_employees_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@month", date.Month);
+                cmd.Parameters.AddWithValue("@year", date.Year);
+
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category == "Department")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_departments_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                int month = date.Month;
+                int year = date.Year;
+                cmd.Parameters.AddWithValue("@month", month);
+                cmd.Parameters.AddWithValue("@year", year);
+
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else if (category == "Position")
+            {
+                SqlCommand cmd = new SqlCommand("Report_performance_by_positions_com", conDW);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@month", date.Month);
+                cmd.Parameters.AddWithValue("@year", date.Year);
+
+                SqlDataAdapter sd = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                conDW.Open();
+                sd.Fill(dt);
+                conDW.Close();
+
+                return dt;
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+                return dt;
+            }
+
+        }
 
     }
 }

@@ -12,14 +12,8 @@ namespace HR_System.Controllers
         User user = new User();
         // GET: Employee
       
-        [ValidateAntiForgeryToken]
-        public ActionResult viewAttendanceList(string start_date, string end_date)
-        {
-            string var = user.viewAttendance(user.User_id,DateTime.Parse(start_date), DateTime.Parse(end_date));
-
-            return View(var.ToList());
-        }
-
+       
+       
         
     }
 }
