@@ -5,6 +5,33 @@
 <html lang="en">
 <head>
     <title>View Training</title>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            var position = '@ViewBag.LoggedUser.Position.PositionName';
+            if (position != "Manager") {
+                document.getElementById("strengthAndWeakness").style.visibility = "hidden";
+                document.getElementById("promotion").style.visibility = "hidden";
+                document.getElementById("companyPerformance").style.visibility = "hidden";
+                document.getElementById("projectPerformance").style.visibility = "hidden";
+
+            }
+            if (position != "HR") {
+                document.getElementById("trainingPage").style.visibility = "hidden";
+                document.getElementById("attendanceReporting").style.visibility = "hidden";
+                document.getElementById("performanceReporting").style.visibility = "hidden";
+                document.getElementById("bonusCreteria").style.visibility = "hidden";
+                document.getElementById("holidayAndPermission").style.visibility = "hidden";
+                document.getElementById("hireApplicant").style.visibility = "hidden";
+
+            }
+            if (position != "TeamLeader") {
+                document.getElementById("projectsAndTasks").style.visibility = "hidden";
+
+            }
+        }
+    </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/css/bootstrap.min.css" />
@@ -61,25 +88,53 @@
     <!--close-top-serch-->
     <!--sidebar-menu-->
     <div id="sidebar">
-        <a href="#" class="visible-phone"><i class="icon icon-file"></i> Addons</a>
         <ul>
-            <li class="submenu active">
+            <li class="submenu" id="trainingPage">
                 <a href="#"><i class="icon icon-list"></i> <span>Training</span></a>
                 <ul>
-                    <li><a href="Training Board.html">Training Board</a></li>
-                    <li><a href="Add Training.html">Add Training</a></li>
+                    <li id="trainingBoard"><a href="@Url.Action("viewTrainingsList", "HrAdmin")">Training Board</a></li>
+                    <li id="addTraining"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
                 </ul>
             </li>
-            <li><a href="Employee Attendance.html"><i class="icon icon-th"></i> <span>Employee Attendance</span></a></li>
-            <li class="submenu">
+            <li id="myAttendance"><a href="@Url.Action("viewAttendanceLog", "User")"><i class="icon icon-th"></i> <span>My Attendance</span></a></li>
+            <li id="taskSceduale"><a href="@Url.Action("viewTasks", "Employee")"><i class="icon icon-th"></i> <span>Task Sceduale</span></a></li>
+            <li id="feedback"><a href="@Url.Action("getFeedbackList", "Employee")"><i class="icon icon-th"></i> <span>Feedback</span></a></li>
+                <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
+            <li id="myPerformanceProgress"><a href="@Url.Action("showPerformanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Performance Progress</span></a></li>
+
+                <li class="submenu" id="attendanceReporting">
                 <a href="#"><i class="icon icon-list"></i> <span>Attendance Reporting</span></a>
                 <ul>
-                    <li><a href="Attendance Progress.html">Progress</a></li>
-                    <li><a href="Attendance Comparison.html">Comparison</a></li>
+                    <li id="attendanceProgress"><a href="@Url.Action("attendance_progress", "HrAdmin")">Progress</a></li>
+                    <li id="attendanceComparison"><a href="@Url.Action("attendance_comparison", "HrAdmin")">Comparison</a></li>
                 </ul>
             </li>
+            <li class="submenu" id="performanceReporting">
+                <a href="#"><i class="icon icon-list"></i> <span>Performance Reporting</span></a>
+                <ul>
+                    <li id="performanceProgress"><a href="@Url.Action("performance_progress", "HrAdmin")">Progress</a></li>
+                    <li id="performanceComparison"><a href="@Url.Action("performance_comparison", "HrAdmin")">Comparison</a></li>
+                </ul>
+            </li>
+            <li class="submenu" id="projectsAndTasks">
+                <a href="#"><i class="icon icon-list"></i> <span>Projects and Tasks</span></a>
+                <ul>
+                    <li id="projects"><a href="@Url.Action("projectsList", "TeamLeader")">Projects</a></li>
+                    <li id="tasks"><a href="@Url.Action("getCurrentProject", "TeamLeader")">Tasks</a></li>
+                </ul>
+            </li>
+
+            <li id="bonusCreteria"> <a href="@Url.Action("setBounaceCriteria", "HRAdmin")"><i class="icon icon-list"></i> <span>Bonus Creteria</span></a></li>
+            <li id="promotion"> <a href="@Url.Action("getSuitableEmployeesForPromotion", "Manager")"><i class="icon icon-list"></i> <span>Promotion</span></a></li>
+            <li id="strengthAndWeakness"> <a href="@Url.Action("weaknessAndStrength", "Manager")"><i class="icon icon-list"></i> <span>Strength And Weakness Fields</span></a></li>
+            <li id="companyPerformance"> <a href="@Url.Action("companyPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Company Performance</span></a></li>
+            <li id="projectPerformance"> <a href="@Url.Action("projectPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Project Performance</span></a></li>
+            <li id="holidayAndPermission"> <a href="@Url.Action("holidays", "HrAdmin")"><i class="icon icon-list"></i> <span>Holidays and Permissions</span></a></li>
+            <li id="hireApplicant"> <a href="@Url.Action("hireApplicant", "HrAdmin")"><i class="icon icon-list"></i> <span>Hire Applicant</span></a></li>
+
         </ul>
     </div>
+
     <div id="content">
         <div id="content-header">
             <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="Training Board.html">Training Board</a> <a href="#" class="current">View Traning</a> </div>
@@ -180,7 +235,7 @@
                                                     <td>@dr["phone_number"]</td>
                                                     <td>@dr["address"]</td>
                                                     <td>@dr["skill_rank_before_training"]</td>
-                                                    <td><button type="button" class="btn btn-primary btn-mini"  onclick="unassign(this)">@Html.ActionLink("Unassign", "unassignEmployeeFromTraining", new { training_id = @ViewBag.Training.TrainingId, employee_id = @dr["employee_id"] ,id="link"})</button></td>
+                                                    <td><button type="button" class="btn btn-primary btn-mini" onclick="unassign(this,@ViewBag.Training.TrainingId,@dr["employee_id"])">Un Assign</button></td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -201,8 +256,8 @@
                         <div class="widget-content">
                             <div class="row-fluid">
                                 <div class="span4">
-                                    <input type="text" class="span11" placeholder="Employee Name" />
-                                    <input type="button" class="btn btn-primary" value="Add">
+                                    <input type="text" class="span11" placeholder="Employee User Name" id="name" />
+                                    <input type="button" class="btn btn-primary" value="Add" onclick="addEmployee(@ViewBag.Training.TrainingId)">
                                 </div>
                             </div>
                         </div>
@@ -219,90 +274,27 @@
                         <div class="widget-content">
                             <div class="row-fluid">
                                 <div class="span12">
-                                    <table class="table table-bordered data-table" id="myTable">
+                                    <table class="table table-bordered data-table" id="Table">
                                         <thead>
                                             <tr>
                                                 <th>Employee Name</th>
+                                                <th>Email</th>
+                                                <th>Phone Number</th>
+                                                <th>Address</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr class="odd gradeX">
-                                                <td>Abdelrahman</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
-                                            <tr class="odd gradeX">
-                                                <td>name</td>
-                                                <td><input type="button" class="btn btn-primary btn-mini" value="Assign"></td>
-                                            </tr>
+                                            @foreach (var item in ViewBag.recommendedEmployees)
+                                            {
+                                                <tr class="odd gradeX">
+                                                    <td>@item.UserName</td>
+                                                    <td>@item.Email</td>
+                                                    <td>@item.PhoneNumber</td>
+                                                    <td>@item.Address</td>
+                                                    <td><button class="btn btn-primary btn-mini" value="Assign" onclick="assign(this,@ViewBag.Training.TrainingId,@item.User_id)">Assign </button></td>
+                                                </tr>
+                                            }
                                         </tbody>
                                     </table>
                                 </div>
@@ -327,27 +319,80 @@
     <script src="~/js/jquery.dataTables.min.js"></script>
     <script src="~/js/matrix.tables.js"></script>
     <script type="text/javascript">
-        function unassign(r) {
-            var i = r.parentNode.parentNode.rowIndex;
-            document.getElementById("myTable").deleteRow(i);
-           
-        }
+                                        function unassign(r, trainingId, employeeId) {
+                    var i = r.parentNode.parentNode.rowIndex;
+                    document.getElementById("myTable").deleteRow(i);
 
-        $("#link").click(function (e) {
+                    $.ajax({
+                                            url: "unassignEmployeeFromTraining",
+                        data: {'training_id': trainingId, 'employee_id': employeeId },
+                        success: function (
+                            
+                        ) {
+                            alert("employee has been un assigned!");
+                        }
+                    });
+                    return false;
 
-            e.preventDefault();
-            
-            $.ajax({
-
-                url: $(this).attr("href"), // comma here instead of semicolon
-                success: function () {
-                    alert("Employee Has Been Un Assigned");  // or any other indication if you want to show
                 }
-            });
+                function assign(r, trainingId, employeeId) {
+                    var i = r.parentNode.parentNode.rowIndex;
 
-        });
+
+                    $.ajax({
+                        url: "assignTrainingToEmloyee",
+                        type: 'POST',
+                        datatype: 'json',
+                        data: {'trainingId': trainingId, 'employeeId': employeeId },
+                        success: function (data) {
+                            //debugger
+                            //data = $.parseJSON(data);
+
+                            if (data == 2) {
+                                            alert("No Available Space In That Training !");
+                            } else if (data == 1) {
+                                            document.getElementById("Table").deleteRow(i);
+                                alert("Employee Has Been Assigned Successfully !");
+                            } else if (data == 0) {
+                                            alert("Employee Is Not Available !");
+                            } else {
+                                            alert("An Error Has Been Occured : No such an Employee Exists");
+                            }
+
+                        }
+                    });
+                    return false;
+
+                }
+
+                function addEmployee(trainingId) {
+                    debugger
+                    $.ajax({
+                        url: "addEmployeeToTrainingByName",
+                        type: 'POST',
+                        datatype: 'json',
+                        data: {'userName': document.getElementById("name").value, 'trainingId': trainingId },
+
+                        success: function (data) {
+                            //debugger
+                            //data = $.parseJSON(data);
+
+                            if (data == 2) {
+                                            alert("No Available Space In That Training !");
+                            } else if (data == 1) {
+                                            alert("Employee Has Been Assigned Successfully !");
+                            } else if (data == 0) {
+                                            alert("Employee Is Not Available !");
+                            } else {
+                                            alert("An Error Has Been Occured : No such an Employee Exists");
+                            }
+
+                        }
+                    });
+                    return false;
+                }
     </script>
 
-   
-</body>
+
+    </body>
 </html>

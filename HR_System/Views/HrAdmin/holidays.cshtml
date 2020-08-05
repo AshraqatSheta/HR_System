@@ -1,9 +1,7 @@
-﻿@model HR_System.Models.Utiles
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Add Training</title>
+    <title>Holidays</title>
     <script type="text/javascript">
 
         window.onload = function () {
@@ -35,12 +33,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/bootstrap-responsive.min.css" />
-    <link rel="stylesheet" href="~/css/colorpicker.css" />
-    <link rel="stylesheet" href="~/css/datepicker.css" />
-    <link rel="stylesheet" href="~/css/uniform.css" />
-    <link rel="stylesheet" href="~/css/select2.css" />
     <link rel="stylesheet" href="~/css/matrix-style.css" />
     <link rel="stylesheet" href="~/css/matrix-media.css" />
+    <link rel="stylesheet" href="~/css/uniform.css" />
+    <link rel="stylesheet" href="~/css/select2.css" />
     <link rel="stylesheet" href="~/css/bootstrap-wysihtml5.css" />
     <link href="~/font-awesome/css/font-awesome.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
@@ -89,20 +85,19 @@
     </div>
     <!--close-top-serch-->
     <!--sidebar-menu-->
-
     <div id="sidebar">
         <ul>
             <li class="submenu" id="trainingPage">
                 <a href="#"><i class="icon icon-list"></i> <span>Training</span></a>
                 <ul>
                     <li id="trainingBoard"><a href="@Url.Action("viewTrainingsList", "HrAdmin")">Training Board</a></li>
-                    <li id="addTraining" class="active"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
+                    <li id="addTraining"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
                 </ul>
             </li>
             <li id="myAttendance"><a href="@Url.Action("viewAttendanceLog", "User")"><i class="icon icon-th"></i> <span>My Attendance</span></a></li>
             <li id="taskSceduale"><a href="@Url.Action("viewTasks", "Employee")"><i class="icon icon-th"></i> <span>Task Sceduale</span></a></li>
             <li id="feedback"><a href="@Url.Action("getFeedbackList", "Employee")"><i class="icon icon-th"></i> <span>Feedback</span></a></li>
-            <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
+                <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
             <li id="myPerformanceProgress"><a href="@Url.Action("showPerformanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Performance Progress</span></a></li>
 
                 <li class="submenu" id="attendanceReporting">
@@ -138,119 +133,154 @@
         </ul>
     </div>
 
-    <!-- Content -->
     <div id="content">
         <div id="content-header">
-            <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current">Add Training</a> </div>
-            <h1>Add Training</h1>
+            <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a><a href="#" class="current">Holidays</a> </div>
         </div>
         <div class="container-fluid">
-            <hr>
             <div class="row-fluid">
-                <div class="span6">
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon"> <i class="icon-align-justify"></i> </span>
-                            <h5>Add Training</h5>
-                        </div>
-                        <div>
-                            <form method="post" class="form-horizontal">
-                                <div class="widget-content nopadding">
-
+                <button href="#myModal1" data-toggle="modal" class="btn btn-primary">Holiday</button>
+                <button href="#myModal2" data-toggle="modal" class="btn btn-primary">Permission</button>
+                <button href="#myModal3" data-toggle="modal" class="btn btn-primary">Official Vacation</button>
+                <div id="myModal1" class="modal hide">
+                    <div class="modal-header">
+                        <button data-dismiss="modal" class="close" type="button">×</button>
+                        <h3>Holiday</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="widget-box">
+                            <div class="widget-content nopadding">
+                                <form action="#" method="post" class="form-horizontal" id="holiday">
                                     <div class="control-group">
-                                        <label class="control-label">Training Name :</label>
+                                        <label class="control-label">Employee Name :</label>
                                         <div class="controls">
-                                            <input name="name" type="text" class="span11" placeholder="Training Name" />
+                                            <input type="text" class="span11" placeholder="Employee name" name="name" />
                                         </div>
                                     </div>
                                     <div class="control-group">
                                         <label class="control-label">Start Date :</label>
                                         <div class="controls">
-                                            <div data-date="12-02-2012" class="input-append date datepicker">
-                                                <input name="start_date" type="text" value="12-02-2012" data-date-format="mm-dd-yyyy" class="span11">
-                                                <span class="add-on"><i class="icon-th"></i></span>
-                                            </div>
+                                            <input type="text" class="span11" placeholder="Start date" name="start" />
                                         </div>
                                     </div>
                                     <div class="control-group">
                                         <label class="control-label">End Date :</label>
                                         <div class="controls">
-                                            <div data-date="12-02-2012" class="input-append date datepicker">
-                                                <input name="end_date" type="text" value="12-02-2012" data-date-format="mm-dd-yyyy" class="span11">
-                                                <span class="add-on"><i class="icon-th"></i></span>
-                                            </div>
+                                            <input type="text" class="span11" placeholder="End date" name="end" />
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <label class="control-label">Location :</label>
+                                        <label class="control-label">Causation :</label>
                                         <div class="controls">
-                                            <input name="location" type="text" class="span11" placeholder="Location" />
+                                            <input type="text" class="span11" placeholder="Causation" name="cause" />
                                         </div>
                                     </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Hours Per Day :</label>
-                                        <div class="controls">
-                                            <input name="hours_per_day" type="text" class="span11" placeholder="Hours per day" />
-                                        </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-success" onclick="addHoliday()">Save</button>
                                     </div>
-
-                                    <div class="control-group">
-                                        <label class="control-label">Skill :</label>
-                                        <div class="controls">
-
-                                            @Html.DropDownList("SkillId", new SelectList(ViewBag.skills, "SkillId", "SkillName"), "Please select", new { @id = "ddlSkills" })
-                                            @Html.Hidden("SkillName", null, new { @id = "hfSkillName" })
-
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Maximum Rank :</label>
-                                        <div class="controls">
-                                            <input name="maxRank" type="text" class="span11" placeholder="Max skill rank" />
-                                        </div>
-                                    </div>
-                                    <div class="widget-content nopadding">
-                                        <div class="control-group">
-                                            <label class="control-label">Position :</label>
-                                            <div class="controls">
-
-                                                @Html.DropDownList("PositionId", new SelectList(ViewBag.positions, "PositionId", "PositionName"), "Please select", new { @id = "ddlPosition" })
-                                                @Html.Hidden("PositionName", null, new { @id = "hfPositionName" })
-
-
-                                            </div>
-                                        </div>
-
-                                        <div class="widget-content nopadding">
-                                            <div class="control-group">
-                                                <label class="control-label">Department:</label>
-                                                <div class="controls">
-
-                                                    @Html.DropDownList("DepartmentId", new SelectList(ViewBag.departments, "DepartmentId", "Name"), "Please select", new { @id = "ddlDepartment" })
-                                                    @Html.Hidden("Name", null, new { @id = "hfDepartmentName" })
-
-
-                                                </div>
-                                            </div>
-
-                                            <div class="control-group">
-                                                <label class="control-label">Maximum Number Of Participants :</label>
-                                                <div class="controls">
-                                                    <input name="maxNumPart" type="text" class="span11" />
-                                                </div>
-                                            </div>
-
-                                            <div class="form-actions">
-                                                <button type="submit" class="btn btn-success">Save</button>
-                                            </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div id="myModal2" class="modal hide">
+                    <div class="modal-header">
+                        <button data-dismiss="modal" class="close" type="button">×</button>
+                        <h3>Permission</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="widget-box">
+                            <div class="widget-content nopadding">
+                                <form action="#" method="post" class="form-horizontal" id="permission">
+                                    <div class="control-group">
+                                        <label class="control-label">Employee Name :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Employee name" name="name" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Start Time :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Start time" name="start" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">End Time :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="End time" name="end" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Date :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Date" name="date" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Causation :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Causation" name="cause" />
+                                        </div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-success" onclick="addPermission()">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="myModal3" class="modal hide">
+                    <div class="modal-header">
+                        <button data-dismiss="modal" class="close" type="button">×</button>
+                        <h3>Official Vaction</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="widget-box">
+                            <div class="widget-content nopadding">
+                                <form action="#" method="post" class="form-horizontal" id="vacation">
+
+                                    <div class="control-group">
+                                        <label class="control-label">Name :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Name" name="name" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Start Date :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="Start date" name="start" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">End Date :</label>
+                                        <div class="controls">
+                                            <input type="text" class="span11" placeholder="End date" name="end" />
+                                        </div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-success" onclick="addVacation()">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-    <!-- end Content part -->
+    <!--Footer-part-->
+    <div class="row-fluid">
+        <div id="footer" class="span12"> 2013 &copy; Matrix Admin. Brought to you by <a href="http://themedesigner.in">Themedesigner.in</a> </div>
+    </div>
+    <!--end-Footer-part-->
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/jquery.ui.custom.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/matrix.js"></script>
+    <script src="~/js/jquery.uniform.js"></script>
+    <script src="~/js/select2.min.js"></script>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/jquery.ui.custom.js"></script>
     <script src="~/js/bootstrap.min.js"></script>
@@ -266,9 +296,55 @@
     <script src="~/js/jquery.peity.min.js"></script>
     <script src="~/js/bootstrap-wysihtml5.js"></script>
     <script>
-                                                    $('.textarea_editor').wysihtml5();
+                            $('.textarea_editor').wysihtml5();
+    </script>
+    <script type="text/javascript">
+function addHoliday() {
+var form = $("#holiday").serialize();
+
+
+$.ajax({
+            url: "addHoliday",
+    type: 'POST',
+
+    data: form,
+    dataType: 'json',
+    success: function () {}
+});
+
+
+}
+function addVacation() {
+var form = $("#vacation").serialize();
+
+
+$.ajax({
+            url: "addVacation",
+    type: 'POST',
+
+    data: form,
+    dataType: 'json',
+    success: function () {}
+});
+
+
+}
+function addPermission() {
+var form = $("#permission").serialize();
+
+
+$.ajax({
+            url: "addPermission",
+    type: 'POST',
+
+    data: form,
+    dataType: 'json',
+    success: function () {}
+});
+
+
+}
     </script>
 
     </body>
 </html>
-

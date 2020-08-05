@@ -17,6 +17,25 @@ namespace HR_System.Models
             string constring = ConfigurationManager.ConnectionStrings["HRCon"].ToString();
             con = new SqlConnection(constring);
         }
+        public string getProjectName(int projectId)
+        {
+            string projectName = "";
+            connection();
+            SqlCommand cmd = new SqlCommand("get_project_info", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@project_id", projectId);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                projectName = Convert.ToString(dr["project_name"]);
+            }
+            return projectName;
+        }
+
         public List<Skill> skill_list()
         {
             List<Skill> skill_list = new List<Skill>();
@@ -41,6 +60,80 @@ namespace HR_System.Models
             return skill_list;
 
         }
+        public List<Applicant> applicants_list()
+        {
+            List<Applicant> applicant_list = new List<Applicant>();
+            connection();
+            SqlCommand cmd = new SqlCommand("applicant_list", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Applicant applicant = new Applicant(); 
+                applicant.ApplicantId = Convert.ToInt32(dr["applicant_id"]);
+                applicant.Name = Convert.ToString(dr["name"]);
+                applicant_list.Add(applicant);
+            }
+
+            return applicant_list;
+
+        }
+
+        public List<Project> project_list()
+        {
+            List<Project> projects= new List<Project>();
+
+            connection();
+            SqlCommand cmd = new SqlCommand("project_list", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Project project = new Project();
+                project.ProjectId = Convert.ToInt32(dr["project_id"]);
+                project.ProjectName = Convert.ToString(dr["project_name"]);
+                projects.Add(project);
+            }
+
+            return projects;
+
+        }
+        internal List<Client> client_list()
+        {
+            List<Client> clients = new List<Client>();
+            connection();
+            SqlCommand cmd = new SqlCommand("client_list", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Client client = new Client();
+                client.ClientId = Convert.ToInt32(dr["client_id"]);
+                client.Name = Convert.ToString(dr["client_name"]);
+                clients.Add(client);
+            }
+
+            return clients;
+        }
+
         public string  skill_name(int skill_id)
         {
             string name = "";
@@ -188,6 +281,7 @@ namespace HR_System.Models
 
                 foreach (DataRow dr in dt.Rows)
                 {
+                    user.User_id = Convert.ToInt32(dr["employee_id"]);
                     user.UserName = Convert.ToString(dr["user_name"]);
                     user.Email = Convert.ToString(dr["email"]);
                     user.PhoneNumber = Convert.ToString(dr["phone_number"]);
@@ -199,6 +293,76 @@ namespace HR_System.Models
             
 
             return employees;
+        }
+
+        public int getIdByUserName(string userName)
+        {
+            int id = 0;
+
+            connection();
+            SqlCommand cmd = new SqlCommand("getIdByUserName", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userName", userName);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+
+                id= Convert.ToInt32(dr["employee_id"]);
+                break;
+
+            }
+
+            return id;
+        }
+
+        public int task_id(string name)
+        {
+            int task_id = 0;
+            connection();
+            SqlCommand cmd = new SqlCommand("task_id", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@name", name);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+
+                task_id = Convert.ToInt32(dr["task_id"]);
+
+            }
+
+            return task_id;
+        }
+        public int getTaskId(string projectName, string taskName)
+        {
+            int taskId = 0;
+            connection();
+            SqlCommand cmd = new SqlCommand("get_task_id", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@project_name", projectName);
+            cmd.Parameters.AddWithValue("@task_name", taskName);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                taskId = Convert.ToInt32(dr["task_id"]);
+            }
+            return taskId;
+
         }
     }
 }

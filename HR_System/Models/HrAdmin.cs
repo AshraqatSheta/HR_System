@@ -9,10 +9,11 @@ using System.Web;
 
 namespace HR_System.Models
 {
-    public class HrAdmin
+    public class HrAdmin:Employee
     {
         private SqlConnection con;
         private SqlConnection conDW;
+        Utiles u = new Utiles();
         private void connection()
         {
             string constring = ConfigurationManager.ConnectionStrings["HRCon"].ToString();
@@ -54,7 +55,7 @@ namespace HR_System.Models
                 cmd.Parameters.AddWithValue("@salary", userInfo.Salary);
                 cmd.Parameters.AddWithValue("@start_date", userInfo.StartDate);
                 cmd.Parameters.AddWithValue("@phone_number", userInfo.PhoneNumber);
-                cmd.Parameters.AddWithValue("@gender", userInfo.Gendre);
+                cmd.Parameters.AddWithValue("@gender", userInfo.Gender);
                 cmd.Parameters.AddWithValue("@birth_date", userInfo.BirthDate);
                 cmd.Parameters.AddWithValue("@educational_degree", userInfo.EducationalDrgree);
                 cmd.Parameters.AddWithValue("@graduation_date", userInfo.GraduationDate);
@@ -199,55 +200,44 @@ namespace HR_System.Models
             return attendance;
         }
 
-        private List<List<string>> getPerformancReports(int id)
+        
+       
+        public void addHoliday(Holiday holiday,int hr_id)
         {
-            List<List<string>> performance = new List<List<string>>();
-
-            return performance;
-        }
-        private List<List<string>> getPerformancReports()
-        {
-            List<List<string>> performance = new List<List<string>>();
-
-            return performance;
-        }
-        public int addHoliday(Holiday holiday,int hr_id)
-        {
-            int success;
+           
 
             connection();
-            SqlCommand cmd = new SqlCommand("addHoliday", con);
+            SqlCommand cmd = new SqlCommand("insert_holiday", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@employee_id", holiday.EmployeeId);
+            cmd.Parameters.AddWithValue("@user_name", holiday.EmployeeName);
             cmd.Parameters.AddWithValue("@start_date", holiday.StartDate.Date);
             cmd.Parameters.AddWithValue("@end_date",holiday.EndDate.Date);
             cmd.Parameters.AddWithValue("@cause", holiday.Cause);
-            cmd.Parameters.AddWithValue("@hr_id", hr_id);
+            cmd.Parameters.AddWithValue("@hr", hr_id);
            
             con.Open();
-            success = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
             con.Close();
-            return success;
 
         }
-        public int addPermission(Permission permission,int hr_id)
+        public void addPermission(Permission permission,int hr_id)
         {
 
-            int success;
+            
 
             connection();
-            SqlCommand cmd = new SqlCommand("add_permession", con);
+            SqlCommand cmd = new SqlCommand("insert_permission", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@employee_id", permission.EmployeeId);
-            cmd.Parameters.AddWithValue("@start_date", permission.StartTime.TimeOfDay);
-            cmd.Parameters.AddWithValue("@end_date", permission.EndTime.TimeOfDay);
-            cmd.Parameters.AddWithValue("@cause", permission.Cause);
+            cmd.Parameters.AddWithValue("@user_name", permission.EmployeeName);
+            cmd.Parameters.AddWithValue("@start_time", permission.StartTime);
+            cmd.Parameters.AddWithValue("@end_time", permission.EndTime);
             cmd.Parameters.AddWithValue("@hr_id", hr_id);
+            cmd.Parameters.AddWithValue("@cause", permission.Cause);
 
             con.Open();
-            success = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
             con.Close();
-            return success;
+           
 
 
         }
@@ -264,34 +254,27 @@ namespace HR_System.Models
             int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
             return count;
         }
-        public int addVacation(Official_Vacation vacation)
+        public void addVacation(Official_Vacation vacation)
         {
 
-            int success;
+            
 
             connection();
-            SqlCommand cmd = new SqlCommand("addVacation", con);
+            SqlCommand cmd = new SqlCommand("insert_official_vacation", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@vacationName", vacation.VacationName);
-            cmd.Parameters.AddWithValue("@startDate",vacation.StartDate.Date);
-            cmd.Parameters.AddWithValue("@endDate", vacation.EndDate.Date);
+            cmd.Parameters.AddWithValue("@name", vacation.VacationName);
+            cmd.Parameters.AddWithValue("@start_date",vacation.StartDate.Date);
+            cmd.Parameters.AddWithValue("@end_date", vacation.EndDate.Date);
 
             con.Open();
-            success = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
             con.Close();
-            return success;
+            
 
 
         }
-        public void setBounaceCriteria(float minPerformanceRate, int minExperiencYear)
-        {
-
-        }
-        public List<List<string>> viewCompatibleCandidatesToBounus(int bounusId)
-        {
-            List<List<string>> candidates = new List<List<string>>();
-            return candidates;
-        }
+        
+       
         public int insertTraining(Training training)
         {
             int trainingId=0;
@@ -373,16 +356,30 @@ namespace HR_System.Models
             }
 
         }
-        
+        public int addEmployeeToTrainingByName(string userName ,int training_id)
+        {
+            int employee_id = u.getIdByUserName(userName);
+            if(employee_id <= 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return assignTrainingToEmloyee(training_id, employee_id);
+
+            }
+
+        }
         public int assignTrainingToEmloyee(int trainingId,int employeeId)
         {
            
             
             if (checkEmptyTrainingPlace(trainingId) == 1)
             {
-                DateTime date = new Training().getTrainingStartDate(trainingId);
+                Training training = new Training();
+                DateTime date = training.getTrainingStartDate(trainingId);
                 // if date is not set yet assign employees without constrains
-                if (date == null)
+                if (date == DateTime.MinValue)
                 {
                     connection();
                     SqlCommand cmd = new SqlCommand("assignTraining", con);
@@ -404,12 +401,16 @@ namespace HR_System.Models
                     SqlCommand cmd = new SqlCommand("isEmployeeAvailableOnDate", con);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@employeeId",employeeId);
-                    cmd.Parameters.AddWithValue("@start_date", date);
-                    cmd.Parameters.AddWithValue("@end_date", new Training().getTrainingEndDate(trainingId));
-                    cmd.Parameters.Add("@count", SqlDbType.TinyInt).Direction = ParameterDirection.Output;
+                    string start_date = date.Date.ToString("MM/dd/yyyy");
+                    cmd.Parameters.AddWithValue("@start_date",start_date);
+                    DateTime end = training.getTrainingEndDate(trainingId);
+                    string end_date = end.Date.ToString("MM/dd/yyyy");
+                    cmd.Parameters.AddWithValue("@end_date",end_date);
+                    cmd.Parameters.Add("@count", SqlDbType.Int).Direction = ParameterDirection.Output;
                     con.Open();
                     cmd.ExecuteNonQuery();
-                    int count = Convert.ToInt32(cmd.Parameters["@count"].Value);
+                    int count = 0;
+                    count = Convert.ToInt32(cmd.Parameters["@count"].Value);
                     if(count > 0)
                     {
                         // employee is not available at the training time
@@ -421,9 +422,9 @@ namespace HR_System.Models
                         //assign 
                         connection();
                         SqlCommand cmd_1 = new SqlCommand("assignTraining", con);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@trainingId", trainingId);
-                        cmd.Parameters.AddWithValue("@employeeId", employeeId);
+                        cmd_1.CommandType = CommandType.StoredProcedure;
+                        cmd_1.Parameters.AddWithValue("@trainingId", trainingId);
+                        cmd_1.Parameters.AddWithValue("@employeeId", employeeId);
 
 
                         con.Open();
@@ -1011,6 +1012,137 @@ namespace HR_System.Models
             }
 
         }
+        public DataTable setBounaceCriteria(Bonus bonus)
+        {
+            connection();
+            SqlCommand cmd = new SqlCommand("give_bonus_to_employee", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@department_id", bonus.DepartmentId);
+            cmd.Parameters.AddWithValue("@position_id", bonus.PositionId);
+            cmd.Parameters.AddWithValue("@skill_rank", bonus.MinSkillsRank);
+            cmd.Parameters.AddWithValue("@performance", bonus.MinPerformancePercentage);
+            cmd.Parameters.AddWithValue("@attendance", bonus.MinAttendancePercentage);
+            cmd.Parameters.AddWithValue("@bonus_value", bonus.BonusValue);
+            cmd.Parameters.AddWithValue("@description", bonus.Description);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
 
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            return dt;
+        }
+
+        public void hireApplicant(int applicantId, int positionId, int departmentId,
+         string tempUserName, string tempPassword, double salary, DateTime birth_date
+         , string educational_degree, string graduation_date, string notes
+         )
+        {
+
+            connection();
+            SqlCommand cmd = new SqlCommand("hireApplicant", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@apllicant_id", applicantId);
+            cmd.Parameters.AddWithValue("@position_id", positionId);
+
+            cmd.Parameters.AddWithValue("@department_id", departmentId);
+
+            cmd.Parameters.AddWithValue("@username", tempUserName);
+
+            cmd.Parameters.AddWithValue("@password", Encrypt.Encode(tempPassword));
+
+            cmd.Parameters.AddWithValue("@salary", salary);
+
+            cmd.Parameters.AddWithValue("@birth_date", birth_date);
+
+            cmd.Parameters.AddWithValue("@educational_degree", educational_degree);
+
+            cmd.Parameters.AddWithValue("@graduation_date", graduation_date);
+
+            cmd.Parameters.AddWithValue("@notes", notes);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+            con.Close();
+
+        }
+
+
+    public List<Applicant> getRecommendedApplicants(int graduationYearFrom, int graduationYearTo, int experience, List<Skill> skills)
+        {
+	        List<Applicant> applicants = new List<Applicant>();
+            connection();
+			if(skills.Count<5){
+				int size = skills.Count;
+                Skill skill = skills[0];
+				for(int i=size;i<5;i++){
+					skills.Add(skill);
+				}
+            }
+
+            SqlCommand cmd = new SqlCommand("get_recommended_applicants", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@graduation_year_from", graduationYearFrom);
+			cmd.Parameters.AddWithValue("@graduation_year_to", graduationYearTo);
+			cmd.Parameters.AddWithValue("@experience", experience);
+			cmd.Parameters.AddWithValue("@skill_id1", skills[0].SkillId);
+			cmd.Parameters.AddWithValue("@min_rank1", skills[0].Rate);
+			cmd.Parameters.AddWithValue("@skill_id2", skills[1].SkillId);
+			cmd.Parameters.AddWithValue("@min_rank2", skills[1].Rate);
+			cmd.Parameters.AddWithValue("@skill_id3", skills[2].SkillId);
+			cmd.Parameters.AddWithValue("@min_rank3", skills[2].Rate);
+			cmd.Parameters.AddWithValue("@skill_id4", skills[3].SkillId);
+			cmd.Parameters.AddWithValue("@min_rank4", skills[3].Rate);
+			cmd.Parameters.AddWithValue("@skill_id5", skills[4].SkillId);
+			cmd.Parameters.AddWithValue("@min_rank5", skills[4].Rate);
+		
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                Applicant applicant = new Applicant();
+                applicant.ApplicantId=Convert.ToInt32(dr["applicant_id"]);
+                applicant.Name = Convert.ToString(dr["name"]);
+                applicant.Email = Convert.ToString(dr["email"]);
+                applicant.Ssn =Convert.ToString(dr["ssn"]);
+				applicant.Address=Convert.ToString(dr["address"]);
+				applicant.Education=Convert.ToString(dr["education"]);
+				applicant.GraduationYear=Convert.ToString(dr["graduation_year"]);
+				applicant.YearsOfExperience=Convert.ToString(dr["experience"]);
+				applicant.Gendre=Convert.ToString(dr["gender"]);
+                
+				
+				 connection();
+                 cmd = new SqlCommand("get_list_skills", con);
+                 cmd.CommandType = CommandType.StoredProcedure;
+			     cmd.Parameters.AddWithValue("@apllicant_id",applicant.ApplicantId);
+			     sd = new SqlDataAdapter(cmd);
+                 DataTable dt2 = new DataTable();
+
+                 con.Open();
+                 sd.Fill(dt2);
+                 con.Close();
+			     List<Skill> appSkills = new List<Skill>();
+                 foreach (DataRow dr2 in dt2.Rows)
+                 {
+				    Skill skill = new Skill();
+                    skill.SkillId=Convert.ToInt32(dr2["skill_id"]);
+				    skill.SkillName=Convert.ToString(dr2["skill_name"]);
+				    skill.Rate=Convert.ToInt32(dr2["skill_rank"]);
+				
+				    appSkills.Add(skill);
+			     }
+			 
+			 
+			    applicant.Skills=appSkills;
+                applicants.Add(applicant);
+            }
+            return applicants;
+        }
+        
     }
 }

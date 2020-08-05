@@ -4,7 +4,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <title>Attendance Progress</title>
+    
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+        window.onload = function () {
+         var position = '@ViewBag.LoggedUser.Position.PositionName';
+            if (position != "Manager") {
+                document.getElementById("strengthAndWeakness").style.visibility = "hidden";
+                document.getElementById("promotion").style.visibility = "hidden";
+                document.getElementById("companyPerformance").style.visibility = "hidden";
+                document.getElementById("projectPerformance").style.visibility = "hidden";
+
+            }
+            if (position != "HR") {
+                document.getElementById("trainingPage").style.visibility = "hidden";
+                document.getElementById("attendanceReporting").style.visibility = "hidden";
+                document.getElementById("performanceReporting").style.visibility = "hidden";
+                document.getElementById("bonusCreteria").style.visibility = "hidden";
+                document.getElementById("holidayAndPermission").style.visibility = "hidden";
+                document.getElementById("hireApplicant").style.visibility = "hidden";
+
+            }
+            if (position != "TeamLeader") {
+                document.getElementById("projectsAndTasks").style.visibility = "hidden";
+
+            }
+            var chart = new CanvasJS.Chart("chartContainer", {
+	        animationEnabled: true,
+	        theme: "light2", // "light1", "dark1", "dark2"
+	        exportEnabled: true,
+	        title: {
+		        text: "Comparison graph"
+                },
+                dataPointWidth: 20,
+	        data: [{
+		        type: "column",
+		        dataPoints:  @Html.Raw(ViewBag.Data)
+	        }]
+        });
+        chart.render();
+
+    }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/css/bootstrap.min.css" />
@@ -70,32 +115,53 @@
     <!--sidebar-menu-->
 
     <div id="sidebar">
-        <a href="#" class="visible-phone"><i class="icon icon-th"></i>Attendance</a>
         <ul>
-            <li class="submenu">
+            <li class="submenu" id="trainingPage">
                 <a href="#"><i class="icon icon-list"></i> <span>Training</span></a>
                 <ul>
-                    <li><a href="Training Board.html">Training Board</a></li>
-                    <li><a href="Add Training.html">Add Training</a></li>
+                    <li id="trainingBoard"><a href="@Url.Action("viewTrainingsList", "HrAdmin")">Training Board</a></li>
+                    <li id="addTraining"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
                 </ul>
             </li>
-            <li><a href="Employee Attendance.html"><i class="icon icon-th"></i> <span>Employee Attendance</span></a></li>
-            <li class="submenu active">
+            <li id="myAttendance"><a href="@Url.Action("viewAttendanceLog", "User")"><i class="icon icon-th"></i> <span>My Attendance</span></a></li>
+            <li id="taskSceduale"><a href="@Url.Action("viewTasks", "Employee")"><i class="icon icon-th"></i> <span>Task Sceduale</span></a></li>
+            <li id="feedback"><a href="@Url.Action("getFeedbackList", "Employee")"><i class="icon icon-th"></i> <span>Feedback</span></a></li>
+            <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
+            <li id="myPerformanceProgress"><a href="@Url.Action("showPerformanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Performance Progress</span></a></li>
+
+            <li class="submenu" id="attendanceReporting">
                 <a href="#"><i class="icon icon-list"></i> <span>Attendance Reporting</span></a>
                 <ul>
-                    <li><a href="Attendance Progress.cshtml">Progress</a></li>
-                    <li><a href="Attendance Comparison.cshtml">Comparison</a></li>
+                    <li id="attendanceProgress" class="active"><a href="@Url.Action("attendance_progress", "HrAdmin")">Progress</a></li>
+                    <li id="attendanceComparison"><a href="@Url.Action("attendance_comparison", "HrAdmin")">Comparison</a></li>
                 </ul>
             </li>
-            <li class="submenu">
+            <li class="submenu" id="performanceReporting">
                 <a href="#"><i class="icon icon-list"></i> <span>Performance Reporting</span></a>
                 <ul>
-                    <li><a href="Performance Progress.html">Progress</a></li>
-                    <li><a href="Performance Comparison.html">Comparison</a></li>
+                    <li id="performanceProgress"><a href="@Url.Action("performance_progress", "HrAdmin")">Progress</a></li>
+                    <li id="performanceComparison"><a href="@Url.Action("performance_comparison", "HrAdmin")">Comparison</a></li>
                 </ul>
             </li>
+            <li class="submenu" id="projectsAndTasks">
+                <a href="#"><i class="icon icon-list"></i> <span>Projects and Tasks</span></a>
+                <ul>
+                    <li id="projects"><a href="@Url.Action("projectsList", "TeamLeader")">Projects</a></li>
+                    <li id="tasks"><a href="@Url.Action("getCurrentProject", "TeamLeader")">Tasks</a></li>
+                </ul>
+            </li>
+
+            <li id="bonusCreteria"> <a href="@Url.Action("setBounaceCriteria", "HRAdmin")"><i class="icon icon-list"></i> <span>Bonus Creteria</span></a></li>
+            <li id="promotion"> <a href="@Url.Action("getSuitableEmployeesForPromotion", "Manager")"><i class="icon icon-list"></i> <span>Promotion</span></a></li>
+            <li id="strengthAndWeakness"> <a href="@Url.Action("weaknessAndStrength", "Manager")"><i class="icon icon-list"></i> <span>Strength And Weakness Fields</span></a></li>
+            <li id="companyPerformance"> <a href="@Url.Action("companyPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Company Performance</span></a></li>
+            <li id="projectPerformance"> <a href="@Url.Action("projectPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Project Performance</span></a></li>
+            <li id="holidayAndPermission"> <a href="@Url.Action("holidays", "HrAdmin")"><i class="icon icon-list"></i> <span>Holidays and Permissions</span></a></li>
+            <li id="hireApplicant"> <a href="@Url.Action("hireApplicant", "HrAdmin")"><i class="icon icon-list"></i> <span>Hire Applicant</span></a></li>
+
         </ul>
     </div>
+
     <div id="content">
         <div id="content-header">
             <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current">Attendance Progress</a> </div>
@@ -137,30 +203,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                
-                                @foreach (DataRow dr in Model.Rows) { 
-                                
-                                <tr>
-                                    <td>@dr["month"]-@dr["year"]</td>
-                                    <td>@dr["attendance_percentage"] %</td>
-                                </tr>
+
+                                @foreach (DataRow dr in Model.Rows)
+                                {
+
+                                    <tr>
+                                        <td>@dr["month"]-@dr["year"]</td>
+                                        <td>@dr["attendance_percentage"] %</td>
+                                    </tr>
                                 }
 
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="span6">
-                    <h5>Chart</h5>
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon"> <i class="icon-list"></i> </span>
-                            <h5>To be discussed</h5>
-                        </div>
-                        <div class="widget-content"> Chart </div>
-                    </div>
-                </div>
+
             </div>
+            <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+
         </div>
     </div>
     <!--Footer-part-->
@@ -168,6 +228,8 @@
         <div id="footer" class="span12"> 2013 &copy; Matrix Admin. Brought to you by <a href="http://themedesigner.in">Themedesigner.in</a> </div>
     </div>
     <!--end-Footer-part-->
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/jquery.ui.custom.js"></script>
     <script src="~/js/bootstrap.min.js"></script>
@@ -185,5 +247,6 @@
     <script>
         $('.textarea_editor').wysihtml5();
     </script>
+
 </body>
 </html>

@@ -3,6 +3,33 @@
     <html lang="en">
     <head>
         <title>Training Board</title>
+        <script type="text/javascript">
+
+        window.onload = function () {
+            var position = '@ViewBag.LoggedUser.Position.PositionName';
+            if (position != "Manager") {
+                document.getElementById("strengthAndWeakness").style.visibility = "hidden";
+                document.getElementById("promotion").style.visibility = "hidden";
+                document.getElementById("companyPerformance").style.visibility = "hidden";
+                document.getElementById("projectPerformance").style.visibility = "hidden";
+
+            }
+            if (position != "HR") {
+                document.getElementById("trainingPage").style.visibility = "hidden";
+                document.getElementById("attendanceReporting").style.visibility = "hidden";
+                document.getElementById("performanceReporting").style.visibility = "hidden";
+                document.getElementById("bonusCreteria").style.visibility = "hidden";
+                document.getElementById("holidayAndPermission").style.visibility = "hidden";
+                document.getElementById("hireApplicant").style.visibility = "hidden";
+
+            }
+            if (position != "TeamLeader") {
+                document.getElementById("projectsAndTasks").style.visibility = "hidden";
+
+            }
+        }
+        </script>
+
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link href="~/css/bootstrap.min.css" rel="stylesheet" />
@@ -60,17 +87,53 @@
         <!--sidebar-menu-->
 
         <div id="sidebar">
-            <a href="#" class="visible-phone"><i class="icon icon-th"></i>Training Board</a>
             <ul>
-                <li class="submenu active">
+                <li class="submenu" id="trainingPage">
                     <a href="#"><i class="icon icon-list"></i> <span>Training</span></a>
                     <ul>
-                        <li><a href="Training Board.html">Training Board</a></li>
-                        <li><a href="Add Training.html">Add Training</a></li>
+                        <li id="trainingBoard" class="active"><a href="@Url.Action("viewTrainingsList", "HrAdmin")">Training Board</a></li>
+                        <li id="addTraining"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
                     </ul>
                 </li>
+                <li id="myAttendance"><a href="@Url.Action("viewAttendanceLog", "User")"><i class="icon icon-th"></i> <span>My Attendance</span></a></li>
+                <li id="taskSceduale"><a href="@Url.Action("viewTasks", "Employee")"><i class="icon icon-th"></i> <span>Task Sceduale</span></a></li>
+                <li id="feedback"><a href="@Url.Action("getFeedbackList", "Employee")"><i class="icon icon-th"></i> <span>Feedback</span></a></li>
+                    <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
+            <li id="myPerformanceProgress"><a href="@Url.Action("showPerformanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Performance Progress</span></a></li>
+
+                    <li class="submenu" id="attendanceReporting">
+                    <a href="#"><i class="icon icon-list"></i> <span>Attendance Reporting</span></a>
+                    <ul>
+                        <li id="attendanceProgress"><a href="@Url.Action("attendance_progress", "HrAdmin")">Progress</a></li>
+                        <li id="attendanceComparison"><a href="@Url.Action("attendance_comparison", "HrAdmin")">Comparison</a></li>
+                    </ul>
+                </li>
+                <li class="submenu" id="performanceReporting">
+                    <a href="#"><i class="icon icon-list"></i> <span>Performance Reporting</span></a>
+                    <ul>
+                        <li id="performanceProgress"><a href="@Url.Action("performance_progress", "HrAdmin")">Progress</a></li>
+                        <li id="performanceComparison"><a href="@Url.Action("performance_comparison", "HrAdmin")">Comparison</a></li>
+                    </ul>
+                </li>
+                <li class="submenu" id="projectsAndTasks">
+                    <a href="#"><i class="icon icon-list"></i> <span>Projects and Tasks</span></a>
+                    <ul>
+                        <li id="projects"><a href="@Url.Action("projectsList", "TeamLeader")">Projects</a></li>
+                        <li id="tasks"><a href="@Url.Action("getCurrentProject", "TeamLeader")">Tasks</a></li>
+                    </ul>
+                </li>
+
+                <li id="bonusCreteria"> <a href="@Url.Action("setBounaceCriteria", "HRAdmin")"><i class="icon icon-list"></i> <span>Bonus Creteria</span></a></li>
+                <li id="promotion"> <a href="@Url.Action("getSuitableEmployeesForPromotion", "Manager")"><i class="icon icon-list"></i> <span>Promotion</span></a></li>
+                <li id="strengthAndWeakness"> <a href="@Url.Action("weaknessAndStrength", "Manager")"><i class="icon icon-list"></i> <span>Strength And Weakness Fields</span></a></li>
+                <li id="companyPerformance"> <a href="@Url.Action("companyPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Company Performance</span></a></li>
+                <li id="projectPerformance"> <a href="@Url.Action("projectPerformanceReport", "Manager")"><i class="icon icon-list"></i> <span>Project Performance</span></a></li>
+                <li id="holidayAndPermission"> <a href="@Url.Action("holidays", "HrAdmin")"><i class="icon icon-list"></i> <span>Holidays and Permissions</span></a></li>
+                <li id="hireApplicant"> <a href="@Url.Action("hireApplicant", "HrAdmin")"><i class="icon icon-list"></i> <span>Hire Applicant</span></a></li>
+
             </ul>
         </div>
+
         <!-- Content -->
         <div id="content">
             <div id="content-header">
@@ -94,13 +157,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in Model) {
+                                        @foreach (var item in Model)
+                                        {
                                         <tr class="odd gradeX">
                                             <td>@Html.DisplayFor(modelItem => item.TrainingName)</td>
                                             <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
                                             <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
                                             <td class="center"> @Html.DisplayFor(modelItem => item.MaxNumOfParticipants)</td>
-                                            <td><input type="button" class="btn btn-primary" value="Delete" onclick="deleteRow(this)"></td>
+                                            <td><a href="@Url.Action("viewTraining", "HrAdmin",new { training_id= item.TrainingId})"><input type="button" class="btn btn-primary" value="View" ></a><input type="button" class="btn btn-danger" value="Delete" onclick="deleteRow(this)"></td>
                                         </tr>
                                         }
                                     </tbody>
@@ -113,10 +177,10 @@
         </div>
         <!-- end Content part -->
         <script>
-function deleteRow(r) {
-  var i = r.parentNode.parentNode.rowIndex;
-  document.getElementById("myTable").deleteRow(i);
-}
+            function deleteRow(r) {
+                var i = r.parentNode.parentNode.rowIndex;
+                document.getElementById("myTable").deleteRow(i);
+            }
         </script>
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.ui.custom.js"></script>
@@ -126,7 +190,7 @@ function deleteRow(r) {
         <script src="js/jquery.dataTables.min.js"></script>
         <script src="js/matrix.js"></script>
         <script src="js/matrix.tables.js"></script>
-    </body>
+        </body>
 </html>
 
 

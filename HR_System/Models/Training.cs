@@ -57,7 +57,7 @@ namespace HR_System.Models
             con.Close();
             foreach (DataRow dr in dt.Rows)
             {
-                date = Convert.ToDateTime(dr["start_date"]);
+                date =Convert.ToDateTime(dr["start_date"]); 
 
             }
             return date;

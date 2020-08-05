@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HR.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -11,7 +12,7 @@ using System.Web;
 
 namespace HR_System.Models
 {
-    public class User
+    public class User:User_Info
     {
         private int user_id;
         private int department_id;
@@ -35,10 +36,29 @@ namespace HR_System.Models
         {
 
         }
-        private int logIn(string userName, string password)
+        public int logIn(string userName, string password)
         {
+            connection();
             int id = 0;
+           
+            SqlCommand cmd = new SqlCommand("logIn", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userName", userName);
+            cmd.Parameters.AddWithValue("@password", (password));
 
+            cmd.Parameters.Add("@id", SqlDbType.Int).Direction = ParameterDirection.Output;
+            con.Open();
+            cmd.ExecuteNonQuery();
+            if (!DBNull.Value.Equals(cmd.Parameters["@id"].Value))
+            {
+                id = Convert.ToInt32(cmd.Parameters["@id"].Value);
+            }
+            else
+            {
+                id = 0;
+
+            }
+            
             return id;
 
         }
@@ -453,6 +473,84 @@ namespace HR_System.Models
             List<string> profileInfo = new List<string>();
 
             return profileInfo;
+        }
+
+       // public void signInTemp()
+        public User_Info getUser(int id)
+        {
+            connection();
+            User_Info user = new User_Info();
+            
+            SqlCommand cmd = new SqlCommand("userInfo", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@id",id);
+            
+
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+            foreach (DataRow dr in dt.Rows)
+            {
+                user.User_id = Convert.ToInt32(dr["employee_id"]);
+                user.UserName = Convert.ToString(dr["user_name"]);
+                Department department = new Department();
+                department.DepartmentId = Convert.ToInt32(dr["department_id"]);
+                department.Name = Convert.ToString(dr["department_name"]);
+                department.ManagerId = Convert.ToInt32(dr["manager_id"]);
+                user.Department = department;
+
+                Position position = new Position();
+                position.PositionId = Convert.ToInt32(dr["position_id"]);
+                position.PositionName = Convert.ToString(dr["position_name"]);
+                position.PositionDescription = Convert.ToString(dr["position_description"]);
+                user.Position = position;
+
+                user.FullName = Convert.ToString(dr["full_name"]);
+                user.Email = Convert.ToString(dr["email"]);
+                user.Salary = Convert.ToDouble(dr["salary"]);
+                user.PhoneNumber = Convert.ToString(dr["phone_number"]);
+                user.Ssn = Convert.ToString(dr["ssd"]);
+                user.Address = Convert.ToString(dr["address"]);
+                user.StartDate = Convert.ToDateTime(dr["start_date"]);
+                user.Gender = Convert.ToString(dr["gender"]);
+                user.BirthDate = Convert.ToDateTime(dr["birth_date"]);
+                user.EducationalDrgree = Convert.ToString(dr["educational_degree"]);
+                user.GraduationDate = Convert.ToDateTime(dr["graduation_date"]);
+                user.Notes = Convert.ToString(dr["notes"]);
+                user.EmployeeSkills = getEmployeeSkills(Convert.ToInt32(dr["employee_id"]));
+            }
+            return user;
+        }
+        public List<Skill> getEmployeeSkills(int employeeId)
+        {
+
+            List<Skill> skills = new List<Skill>();
+
+            connection();
+            SqlCommand cmd = new SqlCommand("get_skills_for_employee", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@employee_id", employeeId);
+            SqlDataAdapter sd = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            con.Open();
+            sd.Fill(dt);
+            con.Close();
+
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                Skill skill = new Skill();
+                skill.SkillId = Convert.ToInt32(dr["skill_id"]);
+                skill.SkillName = Convert.ToString(dr["skill_name"]);
+                skill.SkillDescription = Convert.ToString(dr["description"]);
+                skill.Rate = Convert.ToInt32(dr["skill_rank"]);
+                skills.Add(skill);
+            }
+            return skills;
+
         }
     }
 }

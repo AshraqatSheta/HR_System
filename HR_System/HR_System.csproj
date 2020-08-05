@@ -238,6 +238,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
@@ -266,15 +267,21 @@
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HrAdminController.cs" />
+    <Compile Include="Controllers\ManagerController.cs" />
+    <Compile Include="Controllers\TeamLeaderController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Applicant.cs" />
+    <Compile Include="Models\ApplicantForm.cs" />
     <Compile Include="Models\Attendance.cs" />
-    <Compile Include="Models\Bounus.cs" />
+    <Compile Include="Models\Bonus.cs" />
+    <Compile Include="Models\Client.cs" />
+    <Compile Include="Models\DataPoint.cs" />
     <Compile Include="Models\Department.cs" />
     <Compile Include="Models\Employee.cs" />
+    <Compile Include="Models\EmployeeSkills.cs" />
     <Compile Include="Models\Encrypt.cs" />
     <Compile Include="Models\Feedback.cs" />
     <Compile Include="Models\Holiday.cs" />
@@ -1371,6 +1378,25 @@
     <Content Include="Views\HrAdmin\performance_progress.cshtml" />
     <Content Include="Views\HrAdmin\performance_comparison.cshtml" />
     <Content Include="Views\HrAdmin\viewTraining.cshtml" />
+    <Content Include="Views\TeamLeader\projectsList.cshtml" />
+    <Content Include="Views\TeamLeader\getCurrentProject.cshtml" />
+    <Content Include="Views\TeamLeader\AssignEmployees.cshtml" />
+    <Content Include="Views\Employee\getFeedbackList.cshtml" />
+    <Content Include="Views\Employee\giveFeedback.cshtml" />
+    <Content Include="Views\TeamLeader\createTask.cshtml" />
+    <Content Include="Views\TeamLeader\viewTask.cshtml" />
+    <Content Include="Views\Employee\viewTasks.cshtml" />
+    <Content Include="Views\HrAdmin\setBounaceCriteria.cshtml" />
+    <Content Include="Views\Manager\getSuitableEmployeesForPromotion.cshtml" />
+    <Content Include="Views\Employee\showAttendanceProgress.cshtml" />
+    <Content Include="Views\Employee\showPerformanceProgress.cshtml" />
+    <Content Include="Views\User\logIn.cshtml" />
+    <Content Include="Views\User\profileInfo.cshtml" />
+    <Content Include="Views\HrAdmin\hireApplicant.cshtml" />
+    <Content Include="Views\HrAdmin\holidays.cshtml" />
+    <Content Include="Views\Manager\companyPerformanceReport.cshtml" />
+    <Content Include="Views\Manager\projectPerformanceReport.cshtml" />
+    <Content Include="Views\Manager\weaknessAndStrength.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,9 +1,9 @@
-﻿@model HR_System.Models.Utiles
+﻿@model IEnumerable<HR_System.Models.Project>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Add Training</title>
+    <title>Projects</title>
     <script type="text/javascript">
 
         window.onload = function () {
@@ -35,12 +35,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/bootstrap-responsive.min.css" />
-    <link rel="stylesheet" href="~/css/colorpicker.css" />
-    <link rel="stylesheet" href="~/css/datepicker.css" />
-    <link rel="stylesheet" href="~/css/uniform.css" />
-    <link rel="stylesheet" href="~/css/select2.css" />
     <link rel="stylesheet" href="~/css/matrix-style.css" />
     <link rel="stylesheet" href="~/css/matrix-media.css" />
+    <link rel="stylesheet" href="~/css/uniform.css" />
+    <link rel="stylesheet" href="~/css/select2.css" />
     <link rel="stylesheet" href="~/css/bootstrap-wysihtml5.css" />
     <link href="~/font-awesome/css/font-awesome.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
@@ -89,20 +87,19 @@
     </div>
     <!--close-top-serch-->
     <!--sidebar-menu-->
-
     <div id="sidebar">
         <ul>
             <li class="submenu" id="trainingPage">
                 <a href="#"><i class="icon icon-list"></i> <span>Training</span></a>
                 <ul>
                     <li id="trainingBoard"><a href="@Url.Action("viewTrainingsList", "HrAdmin")">Training Board</a></li>
-                    <li id="addTraining" class="active"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
+                    <li id="addTraining"><a href="@Url.Action("addTraining", "HrAdmin")">Add Training</a></li>
                 </ul>
             </li>
             <li id="myAttendance"><a href="@Url.Action("viewAttendanceLog", "User")"><i class="icon icon-th"></i> <span>My Attendance</span></a></li>
             <li id="taskSceduale"><a href="@Url.Action("viewTasks", "Employee")"><i class="icon icon-th"></i> <span>Task Sceduale</span></a></li>
             <li id="feedback"><a href="@Url.Action("getFeedbackList", "Employee")"><i class="icon icon-th"></i> <span>Feedback</span></a></li>
-            <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
+                <li id="myAttendanceProgress"><a href="@Url.Action("showAttendanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Attendance Progress</span></a></li>
             <li id="myPerformanceProgress"><a href="@Url.Action("showPerformanceProgress", "Employee")"><i class="icon icon-th"></i> <span>My Performance Progress</span></a></li>
 
                 <li class="submenu" id="attendanceReporting">
@@ -122,7 +119,7 @@
             <li class="submenu" id="projectsAndTasks">
                 <a href="#"><i class="icon icon-list"></i> <span>Projects and Tasks</span></a>
                 <ul>
-                    <li id="projects"><a href="@Url.Action("projectsList", "TeamLeader")">Projects</a></li>
+                    <li id="projects" class="active"><a href="@Url.Action("projectsList", "TeamLeader")">Projects</a></li>
                     <li id="tasks"><a href="@Url.Action("getCurrentProject", "TeamLeader")">Tasks</a></li>
                 </ul>
             </li>
@@ -138,119 +135,130 @@
         </ul>
     </div>
 
-    <!-- Content -->
     <div id="content">
         <div id="content-header">
-            <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current">Add Training</a> </div>
-            <h1>Add Training</h1>
+            <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a><a href="#" class="current">Projects</a> </div>
         </div>
         <div class="container-fluid">
-            <hr>
             <div class="row-fluid">
-                <div class="span6">
+                <div class="span12">
                     <div class="widget-box">
                         <div class="widget-title">
-                            <span class="icon"> <i class="icon-align-justify"></i> </span>
-                            <h5>Add Training</h5>
-                        </div>
-                        <div>
-                            <form method="post" class="form-horizontal">
-                                <div class="widget-content nopadding">
-
-                                    <div class="control-group">
-                                        <label class="control-label">Training Name :</label>
-                                        <div class="controls">
-                                            <input name="name" type="text" class="span11" placeholder="Training Name" />
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Start Date :</label>
-                                        <div class="controls">
-                                            <div data-date="12-02-2012" class="input-append date datepicker">
-                                                <input name="start_date" type="text" value="12-02-2012" data-date-format="mm-dd-yyyy" class="span11">
-                                                <span class="add-on"><i class="icon-th"></i></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">End Date :</label>
-                                        <div class="controls">
-                                            <div data-date="12-02-2012" class="input-append date datepicker">
-                                                <input name="end_date" type="text" value="12-02-2012" data-date-format="mm-dd-yyyy" class="span11">
-                                                <span class="add-on"><i class="icon-th"></i></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Location :</label>
-                                        <div class="controls">
-                                            <input name="location" type="text" class="span11" placeholder="Location" />
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Hours Per Day :</label>
-                                        <div class="controls">
-                                            <input name="hours_per_day" type="text" class="span11" placeholder="Hours per day" />
-                                        </div>
-                                    </div>
-
-                                    <div class="control-group">
-                                        <label class="control-label">Skill :</label>
-                                        <div class="controls">
-
-                                            @Html.DropDownList("SkillId", new SelectList(ViewBag.skills, "SkillId", "SkillName"), "Please select", new { @id = "ddlSkills" })
-                                            @Html.Hidden("SkillName", null, new { @id = "hfSkillName" })
-
-                                        </div>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="control-label">Maximum Rank :</label>
-                                        <div class="controls">
-                                            <input name="maxRank" type="text" class="span11" placeholder="Max skill rank" />
-                                        </div>
-                                    </div>
-                                    <div class="widget-content nopadding">
-                                        <div class="control-group">
-                                            <label class="control-label">Position :</label>
-                                            <div class="controls">
-
-                                                @Html.DropDownList("PositionId", new SelectList(ViewBag.positions, "PositionId", "PositionName"), "Please select", new { @id = "ddlPosition" })
-                                                @Html.Hidden("PositionName", null, new { @id = "hfPositionName" })
-
-
-                                            </div>
-                                        </div>
-
+                            <span class="icon"> <i class="icon-briefcase"></i> </span>
+                            <h5>Projects</h5>
+                            <a href="#myModal" data-toggle="modal" class="btn btn-primary" style="float: right;">+ New Project</a>
+                            <div id="myModal" class="modal hide">
+                                <div class="modal-header">
+                                    <button data-dismiss="modal" class="close" type="button">×</button>
+                                    <h3>New Project</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="widget-box">
                                         <div class="widget-content nopadding">
-                                            <div class="control-group">
-                                                <label class="control-label">Department:</label>
-                                                <div class="controls">
-
-                                                    @Html.DropDownList("DepartmentId", new SelectList(ViewBag.departments, "DepartmentId", "Name"), "Please select", new { @id = "ddlDepartment" })
-                                                    @Html.Hidden("Name", null, new { @id = "hfDepartmentName" })
-
-
+                                            <form action="#" method="post" id="onlineform" class="form-horizontal">
+                                                <div class="control-group">
+                                                    <label class="control-label">Project Name :</label>
+                                                    <div class="controls">
+                                                        <input name="name" id="name" type="text" class="span11" placeholder="Project name" />
+                                                    </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="control-group">
-                                                <label class="control-label">Maximum Number Of Participants :</label>
-                                                <div class="controls">
-                                                    <input name="maxNumPart" type="text" class="span11" />
+                                                <div class="control-group">
+                                                    <label class="control-label">Client Name</label>
+                                                    <div class="controls">
+                                                        @Html.DropDownList("ClientId", new SelectList(ViewBag.clients, "ClientId", "Name"), "Please select", new { @id = "ddlClients" })
+                                                        @Html.Hidden("Name", null, new { @id = "hfClientName" })
+                                                    </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="form-actions">
-                                                <button type="submit" class="btn btn-success">Save</button>
-                                            </div>
-                            </form>
+                                                <div class="control-group">
+                                                    <label class="control-label">Project Cost :</label>
+                                                    <div class="controls">
+                                                        <input name="cost" id="cost" type="text" class="span11" placeholder="Project cost" />
+                                                    </div>
+                                                </div>
+                                                <div class="control-group">
+                                                    <label class="control-label">Project Department</label>
+                                                    <div class="controls">
+                                                        @Html.DropDownList("DepartmentId", new SelectList(ViewBag.departments, "DepartmentId", "Name"), "Please select", new { @id = "ddlDepartment" })
+                                                        @Html.Hidden("Name", null, new { @id = "hfDepartmentName" })
+                                                    </div>
+                                                </div>
+                                                <div class="control-group">
+                                                    <label class="control-label">Due Date :</label>
+                                                    <div class="controls">
+                                                        <input name="date" id="date" type="text" class="span11" placeholder="Due date" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-actions">
+                                                    <button type="submit" class="btn btn-success" onclick="createProject()">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="row-fluid">
+                                <div class="span12">
+                                    <table class="table table-bordered data-table" id="myTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Project Name</th>
+                                                <th>Client</th>
+                                                <th>Price</th>
+                                                <th>Team Leader</th>
+                                                <th>Department</th>
+                                                <th>Started At</th>
+                                                <th>Due Date</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                <tr class="odd gradeX">
+                                                    <td>@item.ProjectName</td>
+                                                    <td>@item.Client.Name</td>
+                                                    <td>@item.ProjectCost $</td>
+                                                    <td>@ViewBag.LeaderName</td>
+                                                    <td>@item.ProjectDepartment.Name</td>
+                                                    <td>@item.StartDate</td>
+                                                    <td>@item.EndDate</td>
+                                                    @if (item.ActualEndTime != DateTime.MinValue.Date)
+                                                    {
+                                                            <td>
+                                                                <button class="btn btn-primary" onclick="endProject(@item.ProjectId)">End Project</button>
+                                                            </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- end Content part -->
+    <!--Footer-part-->
+    <div class="row-fluid">
+        <div id="footer" class="span12"> 2013 &copy; Matrix Admin. Brought to you by <a href="http://themedesigner.in">Themedesigner.in</a> </div>
+    </div>
+    <!--end-Footer-part-->
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/jquery.ui.custom.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/matrix.js"></script>
+    <script src="~/js/jquery.uniform.js"></script>
+    <script src="~/js/select2.min.js"></script>
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <script src="~/js/matrix.tables.js"></script>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/jquery.ui.custom.js"></script>
     <script src="~/js/bootstrap.min.js"></script>
@@ -265,10 +273,37 @@
     <script src="~/js/wysihtml5-0.3.0.js"></script>
     <script src="~/js/jquery.peity.min.js"></script>
     <script src="~/js/bootstrap-wysihtml5.js"></script>
-    <script>
-                                                    $('.textarea_editor').wysihtml5();
+    <script type="text/javascript">
+                            $('.textarea_editor').wysihtml5();
+                function createProject() {
+                    var form = $("#onlineform").serialize();
+
+
+                    $.ajax({
+                                url: "create_project",
+                        type: 'POST',
+
+                        data: form,
+                        dataType: 'json',
+                        success: function () {}
+                    });
+
+
+        }
+
+        function endProject(projectId) {
+            $.ajax({
+                url: "endProject",
+                data: { 'projectId': projectId },
+                type: 'POST',
+                success: function () {
+                    alert(["Project Has Been Ended"]);
+                }
+            });
+            return false;
+
+        }
     </script>
 
     </body>
 </html>
-
